@@ -1715,9 +1715,10 @@ end
 
 local function showLvglRequired()
   lcd.clear()
-  lcd.drawText(10, 10, "LVGL support required", MIDSIZE)
-  lcd.drawText(10, 30, "Color LCD radio with", 0)
-  lcd.drawText(10, 50, "EdgeTX 2.11.5+, 2.12-rc4+, or 3.0+ needed", 0)
+  lcd.drawText(5, 10, "LVGL support required", BOLD)
+  lcd.drawText(5, 20, "Color LCD radio with", 0)
+  lcd.drawText(5, 30, "EdgeTX 2.11.5+, 2.12-rc4+,", 0)
+  lcd.drawText(5, 40, "or 3.0+ needed", 0)
 end
 
 -- ============================================================================
