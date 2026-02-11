@@ -21,6 +21,7 @@ local App = {
 
   -- User acknowledgment
   warningDismissed = false,
+  warningDismissedAt = nil,
 
   -- Active dialogs
   warningDialog = nil,
@@ -41,6 +42,7 @@ function App.reset()
   App.crsfModuleChecked = false
   App.crsfModuleFound = false
   App.warningDismissed = false
+  App.warningDismissedAt = nil
   App.shouldExit = false
   Protocol.reset()
 end
@@ -1591,10 +1593,12 @@ local function handleWarning()
         App.warningDialog = ModelMismatchDialog.show(
           function()
             App.warningDismissed = true
+            App.warningDismissedAt = getTime()
             UI.invalidate()
           end,
           function()
             App.warningDismissed = true
+            App.warningDismissedAt = getTime()
             App.shouldExit = true
           end
         )
@@ -1604,11 +1608,25 @@ local function handleWarning()
           message = Protocol.elrsFlagsInfo
         })
         App.warningDialog = true
+        App.warningDismissed = true
+        App.warningDismissedAt = getTime()
+      end
+    end
+    -- Re-show after 60 seconds if warning is still active
+    if App.warningDismissed and App.warningDismissedAt then
+      if getTime() - App.warningDismissedAt > 6000 then
+        App.warningDismissed = false
+        App.warningDismissedAt = nil
+        App.warningDialog = nil
       end
     end
   else
     App.warningDialog = nil
-    App.warningDismissed = false
+    -- Only fully reset if the 60s snooze has expired or was never set
+    if not App.warningDismissedAt or (getTime() - App.warningDismissedAt > 6000) then
+      App.warningDismissed = false
+      App.warningDismissedAt = nil
+    end
   end
 end
 
