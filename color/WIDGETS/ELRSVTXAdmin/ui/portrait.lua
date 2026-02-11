@@ -94,6 +94,10 @@ function WidgetUI.buildSixth(w, h, opa)
     { type = "label", font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1, text = detailLine },
   }
+  local labels = VTXDisplay.build6posLabels()
+  for _, lbl in ipairs(labels) do
+    columns[#columns + 1] = lbl
+  end
 
   WidgetLayout.row(w, h, opa, columns)
 end

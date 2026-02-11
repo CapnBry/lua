@@ -139,10 +139,7 @@ function WidgetUI.buildNormal(w, h, opa)
     { type = "label", align = LEFT,
       color = heroColorMismatch,
       font = function()
-        if Telemetry.statusText() then
-          return BOLD
-        end
-        return MIDSIZE
+        return BOLD
       end,
       text = heroTextLq },
     { type = "label", font = WidgetUI.fonts.normal.detail, align = LEFT,

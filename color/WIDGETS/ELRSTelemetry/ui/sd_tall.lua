@@ -121,7 +121,7 @@ function WidgetUI.buildThird(w, h, opa)
       if Telemetry.statusText() then
         return BOLD
       end
-      return MIDSIZE
+      return BOLD
     end,
     text = heroTextLq,
   }

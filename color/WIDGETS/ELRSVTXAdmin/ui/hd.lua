@@ -31,7 +31,7 @@ WidgetUI.fonts = {
   quarter = { status = BOLD },
   third   = { status = MIDSIZE },
   half    = { hero = MIDSIZE, detail = SMLSIZE },
-  full    = { hero = DBLSIZE, detail = 0 },
+  full    = { hero = MIDSIZE, detail = 0 },
 }
 
 

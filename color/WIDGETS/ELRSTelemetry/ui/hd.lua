@@ -148,7 +148,7 @@ function WidgetUI.buildNormal(w, h, opa)
         if Telemetry.statusText() then
           return 0
         end
-        return DBLSIZE
+        return MIDSIZE
       end,
       text = heroTextLq },
     { type = "label", font = WidgetUI.fonts.normal.detail, align = LEFT,
