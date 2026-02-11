@@ -645,12 +645,36 @@ end
 
 local VTXDisplay = {}
 
-function VTXDisplay.statusLine()
-  if Protocol.isActive() then
-    if VTX.state.band == 0 then return "VTX Off" end
-    return table.concat({VTX.state.bandLetter, VTX.state.channel})
+--- True when VTX is tuned to a band (band+channel should be shown in fixed column).
+function VTXDisplay.showChannel()
+  return Protocol.isActive() and VTX.state.band > 0
+end
+
+--- True when a status message should be shown (loading, error, VTX off).
+function VTXDisplay.showStatus()
+  return not Protocol.isActive() or VTX.state.band == 0
+end
+
+--- Band + channel string (e.g. "F6", "R4") when VTX is tuned, "" otherwise.
+function VTXDisplay.bandChannel()
+  if not Protocol.isActive() or VTX.state.band == 0 then
+    return ""
   end
-  return Protocol.statusText
+  return table.concat({VTX.state.bandLetter, VTX.state.channel})
+end
+
+--- Short status message for non-VTX states, "" when VTX is tuned.
+function VTXDisplay.statusText()
+  if Protocol.state == Protocol.STATE_NO_MODULE then
+    return "No module"
+  end
+  if not Protocol.isActive() then
+    return "Loading..."
+  end
+  if VTX.state.band == 0 then
+    return "VTX Off"
+  end
+  return ""
 end
 
 function VTXDisplay.detailLine()

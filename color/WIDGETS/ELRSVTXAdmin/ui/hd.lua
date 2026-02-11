@@ -43,15 +43,18 @@ local TopBarUI = loadScript("/WIDGETS/ELRSVTXAdmin/ui/topbar.lua")({
   Protocol = Protocol, VTX = VTX,
 })
 
---- 1/6: single row. Wide: status + detail + cheatsheet. Narrow: status + detail.
---- Fixed-width status column prevents layout jumping when values change.
+--- 1/6: single row. Wide: band + detail + cheatsheet. Narrow: band + detail.
+--- Fixed-width band column prevents layout jumping when values change.
+--- Loading state uses unconstrained label to avoid overflow in narrow columns.
 function WidgetUI.buildSixth(w, h, opa)
   local wide = w > 400
   local c1w = math.floor(w * 0.22)
   local columns = {
+    { type = "label", color = VTXDisplay.mainColor, font = BOLD,
+      text = VTXDisplay.statusText, visible = VTXDisplay.showStatus },
     { type = "label", w = c1w, color = VTXDisplay.mainColor,
-      font = function() return Protocol.isActive() and WidgetUI.fonts.sixth.status or SMLSIZE end,
-      text = VTXDisplay.statusLine },
+      font = WidgetUI.fonts.sixth.status, text = VTXDisplay.bandChannel,
+      visible = VTXDisplay.showChannel },
     { type = "label", font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1, text = VTXDisplay.detailLine },
   }
@@ -65,16 +68,21 @@ function WidgetUI.buildSixth(w, h, opa)
   WidgetLayout.row(w, h, opa, columns)
 end
 
---- 1/4: status + power, cheatsheet.
---- Fixed-width status column prevents layout jumping when values change.
+--- 1/4: band + power, cheatsheet.
+--- Fixed-width band column prevents layout jumping when values change.
+--- Loading state uses unconstrained label to avoid overflow in narrow columns.
 function WidgetUI.buildQuarter(w, h, opa)
   local c1w = math.floor(w * 0.22)
   local rows = {
+    { type = "label", align = LEFT, text = VTXDisplay.statusText,
+      color = VTXDisplay.mainColor, font = BOLD,
+      visible = VTXDisplay.showStatus },
     { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-      align = LEFT + VCENTER, children = {
-      { type = "label", w = c1w, align = LEFT, text = VTXDisplay.statusLine,
-        color = VTXDisplay.mainColor,
-        font = function() return Protocol.isActive() and WidgetUI.fonts.quarter.status or SMLSIZE end },
+      align = LEFT + VCENTER,
+      visible = VTXDisplay.showChannel,
+      children = {
+      { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
+        color = VTXDisplay.mainColor, font = WidgetUI.fonts.quarter.status },
       { type = "label", font = WidgetUI.fonts.quarter.status, align = LEFT,
         text = VTXDisplay.powerShort,
         color = COLOR_THEME_SECONDARY1 },
@@ -87,17 +95,22 @@ function WidgetUI.buildQuarter(w, h, opa)
   WidgetLayout.column(w, h, opa, rows)
 end
 
---- 1/3: title + status + power, cheatsheet.
---- Fixed-width status column prevents layout jumping when values change.
+--- 1/3: title + band + power, cheatsheet.
+--- Fixed-width band column prevents layout jumping when values change.
+--- Loading state uses unconstrained label to avoid overflow in narrow columns.
 function WidgetUI.buildThird(w, h, opa)
   local c1w = math.floor(w * 0.22)
   local rows = {
     { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
+    { type = "label", align = LEFT, text = VTXDisplay.statusText,
+      color = VTXDisplay.mainColor, font = BOLD,
+      visible = VTXDisplay.showStatus },
     { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-      align = LEFT + VCENTER, children = {
-        { type = "label", w = c1w, align = LEFT, text = VTXDisplay.statusLine,
-          color = VTXDisplay.mainColor,
-          font = function() return Protocol.isActive() and WidgetUI.fonts.third.status or SMLSIZE end },
+      align = LEFT + VCENTER,
+      visible = VTXDisplay.showChannel,
+      children = {
+        { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
+          color = VTXDisplay.mainColor, font = WidgetUI.fonts.third.status },
         { type = "label", font = WidgetUI.fonts.third.status, align = LEFT,
           text = VTXDisplay.powerShort,
           color = COLOR_THEME_SECONDARY1 },
@@ -112,13 +125,16 @@ function WidgetUI.buildThird(w, h, opa)
   WidgetLayout.column(w, h, opa, rows)
 end
 
---- 1/2: title + MIDSIZE status + detail + cheatsheet.
+--- 1/2: title + MIDSIZE band + detail + cheatsheet.
 function WidgetUI.buildHalf(w, h, opa)
   local rows = {
     { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    { type = "label", align = LEFT, text = VTXDisplay.statusLine,
-        color = VTXDisplay.mainColor,
-        font = function() return Protocol.isActive() and WidgetUI.fonts.half.hero or 0 end },
+    { type = "label", align = LEFT, text = VTXDisplay.statusText,
+      color = VTXDisplay.mainColor, font = BOLD,
+      visible = VTXDisplay.showStatus },
+    { type = "label", align = LEFT, text = VTXDisplay.bandChannel,
+      color = VTXDisplay.mainColor, font = WidgetUI.fonts.half.hero,
+      visible = VTXDisplay.showChannel },
     { type = "label", font = WidgetUI.fonts.half.detail, align = LEFT,
       text = VTXDisplay.detailLong,
       color = COLOR_THEME_SECONDARY1 },
@@ -131,19 +147,22 @@ function WidgetUI.buildHalf(w, h, opa)
   WidgetLayout.column(w, h, opa, rows)
 end
 
---- 1/1: title + DBLSIZE status + detail + cheatsheet.
+--- 1/1: title + DBLSIZE band + detail + cheatsheet.
 function WidgetUI.buildFull(w, h, opa)
   local rows = {
     { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    { type = "label", align = LEFT, text = VTXDisplay.statusLine,
-      color = VTXDisplay.mainColor,
-      font = function() return Protocol.isActive() and WidgetUI.fonts.full.hero or 0 end },
+    { type = "label", align = LEFT, text = VTXDisplay.statusText,
+      color = VTXDisplay.mainColor, font = BOLD,
+      visible = VTXDisplay.showStatus },
+    { type = "label", align = LEFT, text = VTXDisplay.bandChannel,
+      color = VTXDisplay.mainColor, font = WidgetUI.fonts.full.hero,
+      visible = VTXDisplay.showChannel },
     { type = "label", font = WidgetUI.fonts.full.detail, align = LEFT,
       text = VTXDisplay.detailLong,
       color = COLOR_THEME_SECONDARY1 },
   }
   local cheatsheet = VTXDisplay.buildCheatsheet()
-  if cheatsheet then
+   if cheatsheet then
     rows[#rows + 1] = cheatsheet
   end
 
