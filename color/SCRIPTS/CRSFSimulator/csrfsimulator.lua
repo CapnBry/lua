@@ -25,6 +25,10 @@
 --                    Triggers the Model Mismatch warning dialog.
 --   "armed"          TX + RX connected with the "is Armed" warning flag set.
 --                    Shows armed warning in subtitle.
+--   "slow_loading"   TX + RX connected but PARAMETER_READ responses are
+--                    delayed by ~2 seconds each. Tests how the UI renders
+--                    during slow field discovery (e.g. "Loading..." states
+--                    in minimized widgets, full-screen subtitle updates).
 --   "no_module"      No CRSF module found at all. Triggers the "No Module
 --                    Found" error dialog immediately.
 local config = {
@@ -103,6 +107,36 @@ local queueHead = 1
 local deferredQueue = {}
 local deferredReady = false
 
+-- BW/FreedomTX compatibility: provide a local analogue to table.remove().
+-- Supports remove(tbl) and remove(tbl, idx) semantics.
+local function tableRemove(tbl, idx)
+  if table and table.remove then
+    return table.remove(tbl, idx)
+  end
+
+  local n = #tbl
+  local pos = idx
+  if pos == nil then
+    pos = n
+  end
+  if pos < 1 or pos > n then
+    return nil
+  end
+
+  local removed = tbl[pos]
+  for i = pos, n - 1 do
+    tbl[i] = tbl[i + 1]
+  end
+  tbl[n] = nil
+  return removed
+end
+
+-- Slow loading scenario: time-delayed response queue.
+-- PARAMETER_READ responses are held here until their delivery time, then
+-- promoted to the main queue so the Lua script sees realistic latency.
+local SLOW_LOADING_DELAY_TICKS = 200  -- 2 seconds per field (getTime() at 10ms/tick)
+local delayedResponseQueue = {}
+
 -- Deferred folder name updates simulate the firmware event loop gap:
 -- PARAMETER_WRITE callbacks set config values immediately, but
 -- updateFolderNames() runs on the NEXT event loop iteration.
@@ -136,7 +170,7 @@ local function queuePop()
 
   -- Serve deferred packets only after a nil has been returned (next poll cycle)
   if deferredReady and #deferredQueue > 0 then
-    local pkt = table.remove(deferredQueue, 1)
+    local pkt = tableRemove(deferredQueue, 1)
     return pkt.command, pkt.data
   end
 
@@ -715,7 +749,7 @@ local function getElrsFlags()
     return 0x05  -- connected + model mismatch
   elseif config.scenario == "armed" then
     return 0x09  -- connected + armed
-  elseif config.scenario == "normal" then
+  elseif config.scenario == "normal" or config.scenario == "slow_loading" then
     return 0x01  -- connected
   else
     return 0x00  -- disconnected
@@ -839,7 +873,16 @@ local function mockPush(command, data)
         param._device = param._device or device
         local entry = encodeParameterEntry(device, param, chunk, destAddr)
         param._device = nil  -- clean up temporary reference
-        queuePush(CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY, entry)
+        if config.scenario == "slow_loading" then
+          -- Delay response to simulate slow OTA field loading
+          delayedResponseQueue[#delayedResponseQueue + 1] = {
+            command = CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY,
+            data = entry,
+            deliverAt = getTime() + SLOW_LOADING_DELAY_TICKS,
+          }
+        else
+          queuePush(CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY, entry)
+        end
       end
     end
     return true
@@ -901,6 +944,18 @@ local function mockPop()
     startTime = getTime()
   end
 
+  -- Promote delayed responses whose delivery time has been reached
+  local now = getTime()
+  local i = 1
+  while i <= #delayedResponseQueue do
+    if now >= delayedResponseQueue[i].deliverAt then
+      local entry = tableRemove(delayedResponseQueue, i)
+      queuePush(entry.command, entry.data)
+    else
+      i = i + 1
+    end
+  end
+
   local command, data = queuePop()
 
   -- Apply deferred folder name updates once enough real time has elapsed.
@@ -955,6 +1010,14 @@ local scenarioTelemetry = {
     ["1RSS"] = -87, ["2RSS"] = -93,
     RQly = 99,  ANT = 1,
     RxBt = 15.2, Curr = 12.5,
+  },
+  slow_loading = {
+    -- Same as normal; fields load slowly but telemetry is available
+    TPWR = 50,  RFMD = 7,
+    ["1RSS"] = -87, ["2RSS"] = -93,
+    RQly = 99,  ANT = 1,
+    RxBt = 15.2, Curr = 12.5,
+    FM = "ACRO", Sats = 12, GSpd = 25.3, Alt = 142,
   },
 }
 
