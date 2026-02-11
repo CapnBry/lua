@@ -103,6 +103,30 @@ local queueHead = 1
 local deferredQueue = {}
 local deferredReady = false
 
+-- BW/FreedomTX compatibility: provide a local analogue to table.remove().
+-- Supports remove(tbl) and remove(tbl, idx) semantics.
+local function tableRemove(tbl, idx)
+  if table and table.remove then
+    return table.remove(tbl, idx)
+  end
+
+  local n = #tbl
+  local pos = idx
+  if pos == nil then
+    pos = n
+  end
+  if pos < 1 or pos > n then
+    return nil
+  end
+
+  local removed = tbl[pos]
+  for i = pos, n - 1 do
+    tbl[i] = tbl[i + 1]
+  end
+  tbl[n] = nil
+  return removed
+end
+
 -- Deferred folder name updates simulate the firmware event loop gap:
 -- PARAMETER_WRITE callbacks set config values immediately, but
 -- updateFolderNames() runs on the NEXT event loop iteration.
@@ -136,7 +160,7 @@ local function queuePop()
 
   -- Serve deferred packets only after a nil has been returned (next poll cycle)
   if deferredReady and #deferredQueue > 0 then
-    local pkt = table.remove(deferredQueue, 1)
+    local pkt = tableRemove(deferredQueue, 1)
     return pkt.command, pkt.data
   end
 
