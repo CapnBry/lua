@@ -11,7 +11,7 @@ local name = "ELRSTelemetry"
 
 local function create(zone, options)
   if not _crsfSingleton then
-    local getCRSF = loadScript("/SCRIPTS/ELRSLib/crsf.lua")
+    local getCRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")
     _crsfSingleton = getCRSF()
   end
   local loadable = loadScript("/WIDGETS/" .. name .. "/loadable.lua")

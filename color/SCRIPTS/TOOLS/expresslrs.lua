@@ -1598,7 +1598,6 @@ local function handleWarning()
           end,
           function()
             App.warningDismissed = true
-            App.warningDismissedAt = getTime()
             App.shouldExit = true
           end
         )

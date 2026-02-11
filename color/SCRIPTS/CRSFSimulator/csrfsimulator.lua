@@ -926,9 +926,7 @@ local moduleFound = (config.scenario ~= "no_module")
 -- no_module scenario has no entry -> mockTelemetry returns nil.
 -- ============================================================================
 
--- TX-side sensors reported via CRSF link statistics regardless of RX connection.
--- On real hardware the TX module always sends these; the simulator mirrors that.
-local txModuleTelemetry = { TPWR = 50, RFMD = 7 }
+local txModuleTelemetry = { TPWR = 50 }
 
 local scenarioTelemetry = {
   normal = {
