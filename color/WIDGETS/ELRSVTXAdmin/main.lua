@@ -1,0 +1,43 @@
+---------------------------------------------------------------------------
+-- VTX Administrator Widget                                              --
+-- Displays VTX status (minimized) and allows full VTX configuration     --
+-- (full-screen) via the CRSF config protocol to the ELRS TX module.     --
+--                                                                       --
+-- Uses the loadable.lua pattern to minimize memory when not in use.     --
+-- Requires /SCRIPTS/ELRSLib on the SD card for shared CRSF protocol.    --
+---------------------------------------------------------------------------
+
+local name = "ELRSVTXAdmin"
+
+local function create(zone, options)
+  if not _crsfSingleton then
+    local getCRSF = loadScript("/SCRIPTS/ELRSLib/crsf.lua")
+    _crsfSingleton = getCRSF()
+  end
+  local loadable = loadScript("/WIDGETS/" .. name .. "/loadable.lua")
+  return loadable(zone, options, _crsfSingleton)
+end
+
+local function refresh(widget, event, touchState)
+  widget.refresh(event, touchState)
+end
+
+local function background(widget)
+  widget.background()
+end
+
+local function update(widget, options)
+  widget.update(options)
+end
+
+return {
+  name = "ExpressLRS VTX Admin",
+  create = create,
+  refresh = refresh,
+  background = background,
+  update = update,
+  options = {
+    { "Transparency", VALUE, 2, 0, 5 },
+  },
+  useLvgl = true,
+}
