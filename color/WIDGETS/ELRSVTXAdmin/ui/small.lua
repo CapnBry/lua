@@ -161,10 +161,7 @@ end
 --- 1/2: title + status + detail + cheatsheet.
 function WidgetUI.buildHalf(w, h, opa)
   local rows = {
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-      align = LEFT + VCENTER, children = {
-      { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    }},
+    { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
     { type = "label", align = LEFT, text = VTXDisplay.statusLine,
       color = VTXDisplay.mainColor,
       font = function() return Protocol.isActive() and WidgetUI.fonts.half.hero or 0 end },
@@ -189,10 +186,7 @@ end
 --- 1/1: title + MIDSIZE status + detail + cheatsheet.
 function WidgetUI.buildFull(w, h, opa)
   local rows = {
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-      align = LEFT + VCENTER, children = {
-      { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    }},
+    { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
     { type = "label", align = LEFT, text = VTXDisplay.statusLine,
       color = VTXDisplay.mainColor,
       font = function() return Protocol.isActive() and WidgetUI.fonts.full.hero or 0 end },
