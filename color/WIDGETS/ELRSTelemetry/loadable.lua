@@ -193,21 +193,55 @@ local WidgetLayout = {}
 
 function WidgetLayout.column(w, h, opa, children)
   lvgl.build({
-    { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
-      color = COLOR_THEME_PRIMARY2, opacity = opa },
-    { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_COLUMN, borderPad = lvgl.PAD_SMALL, flexPad = 0, align = LEFT,
-      children = children },
+    {
+      type = "rectangle",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      color = COLOR_THEME_PRIMARY2,
+      opacity = opa,
+      filled = true,
+    },
+    {
+      type = "box",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      align = LEFT,
+      flexFlow = lvgl.FLOW_COLUMN,
+      flexPad = 0,
+      borderPad = lvgl.PAD_SMALL,
+      children = children,
+    },
   })
 end
 
 function WidgetLayout.row(w, h, opa, children)
   lvgl.build({
-    { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
-      color = COLOR_THEME_PRIMARY2, opacity = opa },
-    { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_ROW, borderPad = lvgl.PAD_SMALL, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER,
-      children = children },
+    {
+      type = "rectangle",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      color = COLOR_THEME_PRIMARY2,
+      opacity = opa,
+      filled = true,
+    },
+    {
+      type = "box",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      align = LEFT + VCENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      borderPad = lvgl.PAD_SMALL,
+      children = children,
+    },
   })
 end
 
@@ -270,8 +304,18 @@ end
 
 local function createSectionHeader(container, title)
   container:build({
-    { type = "rectangle", w = lvgl.PERCENT_SIZE + 100, h = lvgl.PAD_SMALL, thickness = 0 },
-    { type = "label", text = title, font = BOLD, color = COLOR_THEME_PRIMARY1 },
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_SMALL,
+      thickness = 0,
+    },
+    {
+      type = "label",
+      font = BOLD,
+      color = COLOR_THEME_PRIMARY1,
+      text = title,
+    },
   })
 end
 
@@ -324,9 +368,13 @@ local function buildFullScreen()
 
   -- Model mismatch warning banner
   fields:build({
-    { type = "label", text = "Model Mismatch — RC commands not sent",
-      font = BOLD, color = RED,
-      visible = function() return crsf.modelMismatch end },
+    {
+      type = "label",
+      font = BOLD,
+      color = RED,
+      text = "Model Mismatch — RC commands not sent",
+      visible = function() return crsf.modelMismatch end,
+    },
   })
 
   -- Link Status section

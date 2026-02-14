@@ -19,9 +19,20 @@ end
 --- Top bar: two lines stacked, no background.
 function TopBarUI.build(w, h)
   lvgl.build({
-    { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_COLUMN, flexPad = 0, align = CENTER, children = {
-        { type = "label", font = SMLSIZE, align = CENTER,
+    {
+      type = "box",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      align = CENTER,
+      flexFlow = lvgl.FLOW_COLUMN,
+      flexPad = 0,
+      children = {
+        {
+          type = "label",
+          align = CENTER,
+          font = SMLSIZE,
           color = function()
             if crsf.modelMismatch then
               return RED
@@ -37,8 +48,12 @@ function TopBarUI.build(w, h)
             end
             local tlm = Telemetry.readLink()
             return table.concat({"LQ ", tostring(tlm.rqly or 0), "%"})
-          end },
-        { type = "label", font = SMLSIZE, align = CENTER,
+          end,
+        },
+        {
+          type = "label",
+          align = CENTER,
+          font = SMLSIZE,
           color = function()
             if crsf.modelMismatch then
               return RED
@@ -58,8 +73,10 @@ function TopBarUI.build(w, h)
               return ""
             end
             return table.concat({tostring(rssi), "dBm"})
-          end },
-      }},
+          end,
+        },
+      },
+    },
   })
 end
 

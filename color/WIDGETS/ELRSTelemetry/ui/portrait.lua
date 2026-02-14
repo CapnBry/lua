@@ -68,15 +68,34 @@ function WidgetUI.buildTiny(w, h, opa)
   local c1w = math.floor(w * 0.35)
   local c2w = w - c1w
   local columns = {
-    { type = "box", w = c1w, h = lvgl.UI_ELEMENT_HEIGHT, children = {
-      { type = "label", y = lvgl.PAD_SMALL, font = BOLD,
-        color = heroColorMismatch,
-        text = heroTextLq },
-    }},
-    { type = "box", w = c2w, h = lvgl.UI_ELEMENT_HEIGHT, children = {
-      { type = "label", y = lvgl.PAD_SMALL, font = SMLSIZE, color = detailColor,
-        text = Telemetry.signalText },
-    }},
+    {
+      type = "box",
+      w = c1w,
+      h = lvgl.UI_ELEMENT_HEIGHT,
+      children = {
+        {
+          type = "label",
+          y = lvgl.PAD_SMALL,
+          font = BOLD,
+          color = heroColorMismatch,
+          text = heroTextLq,
+        },
+      },
+    },
+    {
+      type = "box",
+      w = c2w,
+      h = lvgl.UI_ELEMENT_HEIGHT,
+      children = {
+        {
+          type = "label",
+          y = lvgl.PAD_SMALL,
+          font = SMLSIZE,
+          color = detailColor,
+          text = Telemetry.signalText,
+        },
+      },
+    },
   }
   WidgetLayout.row(w, h, opa, columns)
 end
@@ -86,17 +105,47 @@ end
 function WidgetUI.buildSmall(w, h, opa)
   local c1w = math.floor(w * 0.35)
   local rows = {
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER, children = {
-      { type = "label", w = c1w, font = BOLD, align = LEFT,
-        color = heroColorMismatch,
-        text = heroTextLq },
-      { type = "label", font = SMLSIZE, align = LEFT, color = detailColor,
-        text = Telemetry.signalText },
-    }},
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, children = {
-      { type = "label", font = SMLSIZE, align = LEFT, color = COLOR_THEME_SECONDARY1,
-        text = Telemetry.rfDetailText },
-    }},
+    {
+      type = "box",
+      w = w,
+      align = LEFT + VCENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      borderPad = 0,
+      children = {
+        {
+          type = "label",
+          w = c1w,
+          align = LEFT,
+          font = BOLD,
+          color = heroColorMismatch,
+          text = heroTextLq,
+        },
+        {
+          type = "label",
+          align = LEFT,
+          font = SMLSIZE,
+          color = detailColor,
+          text = Telemetry.signalText,
+        },
+      },
+    },
+    {
+      type = "box",
+      w = w,
+      align = LEFT,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      children = {
+        {
+          type = "label",
+          align = LEFT,
+          font = SMLSIZE,
+          color = COLOR_THEME_SECONDARY1,
+          text = Telemetry.rfDetailText,
+        },
+      },
+    },
   }
   WidgetLayout.column(w, h, opa, rows)
 end
@@ -106,20 +155,30 @@ function WidgetUI.buildThird(w, h, opa)
   local rows = {}
   -- Title row
   rows[#rows + 1] = {
-    type = "label", font = BOLD, text = "ExpressLRS", color = COLOR_THEME_SECONDARY1, align = LEFT,
+    type = "label",
+    align = LEFT,
+    font = BOLD,
+    color = COLOR_THEME_SECONDARY1,
+    text = "ExpressLRS",
   }
   rows[#rows + 1] = {
-    type = "label", font = WidgetUI.fonts.third.hero, align = LEFT,
+    type = "label",
+    align = LEFT,
+    font = WidgetUI.fonts.third.hero,
     color = heroColorMismatch,
     text = heroTextLq,
   }
   rows[#rows + 1] = {
-    type = "label", font = WidgetUI.fonts.third.detail, align = LEFT,
+    type = "label",
+    align = LEFT,
+    font = WidgetUI.fonts.third.detail,
     color = detailColor,
     text = Telemetry.signalText,
   }
   rows[#rows + 1] = {
-    type = "label", font = SMLSIZE, align = LEFT,
+    type = "label",
+    align = LEFT,
+    font = SMLSIZE,
     color = COLOR_THEME_SECONDARY1,
     text = Telemetry.rfDetailText,
   }
@@ -130,23 +189,44 @@ end
 --- Normal: full telemetry display with title.
 function WidgetUI.buildNormal(w, h, opa)
   local rows = {
-    { type = "label", font = BOLD, text = "ExpressLRS", color = COLOR_THEME_SECONDARY1, align = LEFT },
-    { type = "label", align = LEFT,
-      color = heroColorMismatch,
+    {
+      type = "label",
+      align = LEFT,
+      font = BOLD,
+      color = COLOR_THEME_SECONDARY1,
+      text = "ExpressLRS",
+    },
+    {
+      type = "label",
+      align = LEFT,
       font = function()
         if Telemetry.statusText() then
           return BOLD
         end
         return MIDSIZE
       end,
-      text = heroTextLq },
-    { type = "label", font = WidgetUI.fonts.normal.detail, align = LEFT,
+      color = heroColorMismatch,
+      text = heroTextLq,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = WidgetUI.fonts.normal.detail,
       color = detailColor,
-      text = Telemetry.signalText },
-    { type = "label", font = SMLSIZE, align = LEFT,
+      text = Telemetry.signalText,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1,
-      text = Telemetry.rfDetailText },
-    { type = "label", font = SMLSIZE, align = LEFT, color = COLOR_THEME_PRIMARY3,
+      text = Telemetry.rfDetailText,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = SMLSIZE,
+      color = COLOR_THEME_PRIMARY3,
       text = function()
         local vbat = crsf.getSensorValue("RxBt")
         if vbat == nil or vbat <= 0 then
@@ -158,7 +238,8 @@ function WidgetUI.buildNormal(w, h, opa)
           return string.format("Bat %dS %.2fV", cells, vbat / cells)
         end
         return string.format("Bat %.2fV", vbat)
-      end },
+      end,
+    },
   }
   WidgetLayout.column(w, h, opa, rows)
 end
