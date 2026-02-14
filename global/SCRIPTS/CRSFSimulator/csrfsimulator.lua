@@ -408,11 +408,11 @@ local txDevice = {
     -- TX Power folder
     { id = 6,  parent = 0, type = CRSF.FOLDER, name = "TX Power" },
     { id = 7,  parent = 6, type = CRSF.TEXT_SELECTION, name = "Max Power",
-      options = "10;25;50;100;250", value = 4, units = "mW" },
+      options = "10/10;25/25;25/50;25/100;25/250;25/500;25/1000;25/2000", value = 3, units = "mW" },
     { id = 8,  parent = 6, type = CRSF.TEXT_SELECTION, name = "Dynamic",
       options = "Off;Dyn;AUX9;AUX10;AUX11;AUX12", value = 1, units = "" },
     { id = 9,  parent = 6, type = CRSF.TEXT_SELECTION, name = "Fan Thresh",
-      options = "10mW;25mW;50mW;100mW;250mW", value = 3, units = "" },
+      options = "10mW;25mW;50mW;100mW;250mW;500mW;1000mW;2000mW;Never", value = 3, units = "" },
 
     -- VTX Administrator folder
     { id = 10, parent = 0, type = CRSF.FOLDER, name = "VTX Administrator" },

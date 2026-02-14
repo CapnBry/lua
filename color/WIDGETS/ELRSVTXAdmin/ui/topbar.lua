@@ -22,9 +22,21 @@ end
 --- Top bar: ultra-compact single line, no background.
 function TopBarUI.build(w, h)
   lvgl.build({
-    { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = CENTER + VCENTER, children = {
-        { type = "label", font = MIDSIZE, align = CENTER, color = COLOR_THEME_PRIMARY2,
+    {
+      type = "box",
+      x = 0,
+      y = 0,
+      w = w,
+      h = h,
+      align = CENTER + VCENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      children = {
+        {
+          type = "label",
+          align = CENTER,
+          font = MIDSIZE,
+          color = COLOR_THEME_PRIMARY2,
           text = function()
             local s = getStatusLine()
             if s == "--" then
@@ -32,8 +44,10 @@ function TopBarUI.build(w, h)
             end
             local pwr = VTX.state.power > 0 and table.concat({"P", VTX.state.power}) or "P-"
             return table.concat({s, pwr}, " ")
-          end },
-      }},
+          end,
+        },
+      },
+    },
   })
 end
 

@@ -1114,38 +1114,88 @@ function UI.createNumberRow(pg, field)
   end
 
   pg:build({
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, thickness=0, flexFlow=lvgl.FLOW_ROW, flexPad=0, children={
-      {type="rectangle", w=lvgl.PERCENT_SIZE+LABEL_PCT, thickness=0, children={
-        {type="label", text=field.name or "", color=COLOR_THEME_PRIMARY1},
-      }},
-      {type="rectangle", w=lvgl.PERCENT_SIZE+CTRL_PCT, thickness=0, flexFlow=lvgl.FLOW_ROW, align=LEFT, children={
-        {type="numberEdit", min=field.min or 0, max=field.max or 255,
-          get=function() return field.value or 0 end,
-          set=function(val)
-            field.value = val
-          end,
-          edited=function(val)
-            field.value = val
-            Protocol.fieldIntSave(field)
-            Protocol.reloadParentFolder(field)
-          end,
-          display=displayFn,
-          active=function() return not field.disabled end},
-      }},
-    }},
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = 0,
+      thickness = 0,
+      children = {
+        {
+          type = "rectangle",
+          w = lvgl.PERCENT_SIZE + LABEL_PCT,
+          thickness = 0,
+          children = {
+            {
+              type = "label",
+              color = COLOR_THEME_PRIMARY1,
+              text = field.name or "",
+            },
+          },
+        },
+        {
+          type = "rectangle",
+          w = lvgl.PERCENT_SIZE + CTRL_PCT,
+          align = LEFT,
+          flexFlow = lvgl.FLOW_ROW,
+          thickness = 0,
+          children = {
+            {
+              type = "numberEdit",
+              min = field.min or 0,
+              max = field.max or 255,
+              get = function() return field.value or 0 end,
+              set = function(val)
+                field.value = val
+              end,
+              edited = function(val)
+                field.value = val
+                Protocol.fieldIntSave(field)
+                Protocol.reloadParentFolder(field)
+              end,
+              display = displayFn,
+              active = function() return not field.disabled end,
+            },
+          },
+        },
+      },
+    },
   })
 end
 
 function UI.createInfoRow(pg, field)
   pg:build({
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, thickness=0, flexFlow=lvgl.FLOW_ROW, flexPad=0, children={
-      {type="rectangle", w=lvgl.PERCENT_SIZE+LABEL_PCT, thickness=0, children={
-        {type="label", text=field.name or "", color=COLOR_THEME_PRIMARY1},
-      }},
-      {type="rectangle", w=lvgl.PERCENT_SIZE+CTRL_PCT, thickness=0, flexFlow=lvgl.FLOW_ROW, align=LEFT, children={
-        {type="label", text=field.value or ""},
-      }},
-    }},
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = 0,
+      thickness = 0,
+      children = {
+        {
+          type = "rectangle",
+          w = lvgl.PERCENT_SIZE + LABEL_PCT,
+          thickness = 0,
+          children = {
+            {
+              type = "label",
+              color = COLOR_THEME_PRIMARY1,
+              text = field.name or "",
+            },
+          },
+        },
+        {
+          type = "rectangle",
+          w = lvgl.PERCENT_SIZE + CTRL_PCT,
+          align = LEFT,
+          flexFlow = lvgl.FLOW_ROW,
+          thickness = 0,
+          children = {
+            { type = "label", text = field.value or "" },
+          },
+        },
+      },
+    },
   })
 end
 
@@ -1260,9 +1310,13 @@ function UI.build()
     end
 
     local fieldsInFolder = Protocol.getFieldsInFolder(currentFolder)
-    -- Narrow screens (e.g. FlySky EL18 portrait, PA01) are too narrow for 3 folders per row
-    local FOLDERS_PER_ROW = IS_NARROW and 1 or 3
-    local folderWidth = math.floor(100 / FOLDERS_PER_ROW)
+    local FOLDERS_PER_ROW = 2
+    if IS_NARROW then
+      FOLDERS_PER_ROW = 1       -- FlySky EL18 portrait, PA01 (LCD_W < 400)
+    elseif LCD_W >= 800 then
+      FOLDERS_PER_ROW = 3       -- TX16S MK3 and other HD screens
+    end
+    local folderWidth = math.floor(100 / FOLDERS_PER_ROW) - 1
     local i = 1
     while i <= #fieldsInFolder do
       local field = fieldsInFolder[i]
@@ -1284,8 +1338,9 @@ function UI.build()
           for j = 1, #folderBatch, FOLDERS_PER_ROW do
             local rowContainer = fieldContainer:box({
               w = lvgl.PERCENT_SIZE + 100,
+              borderPad = 0,
               flexFlow = lvgl.FLOW_ROW,
-              flexPad = lvgl.PAD_TINY,
+              flexPad = lvgl.PAD_SMALL,
               align = CENTER,
               color = COLOR_THEME_PRIMARY2
             })
@@ -1367,22 +1422,44 @@ function ModelMismatchDialog.show(onContinue, onExit)
   })
 
   dg:build({
-    {type="box", x=10, flexFlow=lvgl.FLOW_COLUMN, flexPad=lvgl.PAD_SMALL, children={
-      {type="label", text="Receiver connected but Model ID doesn't match."},
-      {type="label", text="This prevents controlling the wrong model."},
-      {type="label", text="To use this receiver:"},
-      {type="label", text="Set Model Match to OFF"},
-    }},
-    {type="box", flexFlow=lvgl.FLOW_ROW, flexPad=lvgl.PAD_SMALL, w=lvgl.PERCENT_SIZE+100, children={
-      {type="button", text="Continue", w=lvgl.PERCENT_SIZE+48, press=function()
-        dg:close()
-        onContinue()
-      end},
-      {type="button", text="Exit to Change Model", w=lvgl.PERCENT_SIZE+48, press=function()
-        dg:close()
-        onExit()
-      end},
-    }},
+    {
+      type = "box",
+      x = 10,
+      flexFlow = lvgl.FLOW_COLUMN,
+      flexPad = lvgl.PAD_SMALL,
+      children = {
+        { type = "label", text = "Receiver connected but Model ID doesn't match." },
+        { type = "label", text = "This prevents controlling the wrong model." },
+        { type = "label", text = "To use this receiver:" },
+        { type = "label", text = "Set Model Match to OFF" },
+      },
+    },
+    {
+      type = "box",
+      w = lvgl.PERCENT_SIZE + 100,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_SMALL,
+      children = {
+        {
+          type = "button",
+          w = lvgl.PERCENT_SIZE + 48,
+          text = "Continue",
+          press = function()
+            dg:close()
+            onContinue()
+          end,
+        },
+        {
+          type = "button",
+          w = lvgl.PERCENT_SIZE + 48,
+          text = "Exit to Change Model",
+          press = function()
+            dg:close()
+            onExit()
+          end,
+        },
+      },
+    },
   })
 
   return dg
@@ -1405,20 +1482,37 @@ function NoModuleDialog.show(onExit)
   })
 
   dg:build({
-    {type="box", x=10, flexFlow=lvgl.FLOW_COLUMN, flexPad=lvgl.PAD_SMALL, children={
-      {type="label", text="- Internal/External module enabled"},
-      {type="label", text="- Protocol set to CRSF"},
-      {type="label", text="- Minimum Baud rate (depends on packet rate):"},
-      {type="label", text="  400k for 250Hz", font=SMLSIZE},
-      {type="label", text="  921k for 500Hz", font=SMLSIZE},
-      {type="label", text="  1.87M for F1000", font=SMLSIZE},
-    }},
-    {type="box", flexFlow=lvgl.FLOW_ROW, w=lvgl.PERCENT_SIZE+100, align=CENTER, children={
-      {type="button", text="Exit", w=lvgl.PERCENT_SIZE+98, press=function()
-        dg:close()
-        onExit()
-      end},
-    }},
+    {
+      type = "box",
+      x = 10,
+      flexFlow = lvgl.FLOW_COLUMN,
+      flexPad = lvgl.PAD_SMALL,
+      children = {
+        { type = "label", text = "- Internal/External module enabled" },
+        { type = "label", text = "- Protocol set to CRSF" },
+        { type = "label", text = "- Minimum Baud rate (depends on packet rate):" },
+        { type = "label", font = SMLSIZE, text = "  400k for 250Hz" },
+        { type = "label", font = SMLSIZE, text = "  921k for 500Hz" },
+        { type = "label", font = SMLSIZE, text = "  1.87M for F1000" },
+      },
+    },
+    {
+      type = "box",
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      children = {
+        {
+          type = "button",
+          w = lvgl.PERCENT_SIZE + 98,
+          text = "Exit",
+          press = function()
+            dg:close()
+            onExit()
+          end,
+        },
+      },
+    },
   })
 
   return dg
@@ -1474,14 +1568,53 @@ function CommandPage.showConfirm(name, info, onConfirm, onCancel)
   })
 
   container:build({
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, h=lvgl.PAD_LARGE, thickness=0},
-    {type="label", text=name or "Command", w=lvgl.PERCENT_SIZE+100, align=CENTER, font=BOLD},
-    {type="label", text=info or "", w=lvgl.PERCENT_SIZE+100, align=CENTER, color=COLOR_THEME_DISABLED},
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, h=lvgl.PAD_LARGE, thickness=0},
-    {type="box", w=lvgl.PERCENT_SIZE+100, flexFlow=lvgl.FLOW_ROW, flexPad=lvgl.PAD_SMALL, align=CENTER, children={
-      {type="button", text="Confirm", w=lvgl.PERCENT_SIZE+49, press=onConfirm},
-      {type="button", text="Cancel", w=lvgl.PERCENT_SIZE+49, press=onCancel},
-    }},
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_LARGE,
+      thickness = 0,
+    },
+    {
+      type = "label",
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      font = BOLD,
+      text = name or "Command",
+    },
+    {
+      type = "label",
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      color = COLOR_THEME_DISABLED,
+      text = info or "",
+    },
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_LARGE,
+      thickness = 0,
+    },
+    {
+      type = "box",
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_SMALL,
+      children = {
+        {
+          type = "button",
+          w = lvgl.PERCENT_SIZE + 49,
+          text = "Confirm",
+          press = onConfirm,
+        },
+        {
+          type = "button",
+          w = lvgl.PERCENT_SIZE + 49,
+          text = "Cancel",
+          press = onCancel,
+        },
+      },
+    },
   })
 
   return pg
@@ -1505,10 +1638,31 @@ function CommandPage.showExecuting(title, onCancel)
   createSpinner(container)
 
   container:build({
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, h=lvgl.PAD_SMALL, thickness=0},
-    {type="label", text="Hold [RTN] to exit and keep running", w=lvgl.PERCENT_SIZE+100, align=CENTER, color=COLOR_THEME_DISABLED},
-    {type="rectangle", w=lvgl.PERCENT_SIZE+100, h=lvgl.PAD_LARGE, thickness=0},
-    {type="button", text="Cancel command", w=lvgl.PERCENT_SIZE+100, press=onCancel},
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_SMALL,
+      thickness = 0,
+    },
+    {
+      type = "label",
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      color = COLOR_THEME_DISABLED,
+      text = "Hold [RTN] to exit and keep running",
+    },
+    {
+      type = "rectangle",
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_LARGE,
+      thickness = 0,
+    },
+    {
+      type = "button",
+      w = lvgl.PERCENT_SIZE + 100,
+      text = "Cancel command",
+      press = onCancel,
+    },
   })
 
   return pg

@@ -71,8 +71,24 @@ local function buildCheatsheetNarrow()
   for i = 4, 6 do row2[#row2 + 1] = labels[i] end
   local vis = function() return Protocol.state ~= Protocol.STATE_NO_MODULE end
   return
-    { type = "box", flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row1 },
-    { type = "box", flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row2 }
+    {
+      type = "box",
+      align = LEFT,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      borderPad = 0,
+      visible = vis,
+      children = row1,
+    },
+    {
+      type = "box",
+      align = LEFT,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      borderPad = 0,
+      visible = vis,
+      children = row2,
+    }
 end
 
 -- ============================================================================
@@ -89,13 +105,27 @@ local TopBarUI = loadScript("/WIDGETS/ELRSVTXAdmin/ui/topbar.lua")({
 function WidgetUI.buildSixth(w, h, opa)
   local c1w = math.floor(w * 0.28)
   local columns = {
-    { type = "label", w = c1w, color = VTXDisplay.mainColor,
-      font = WidgetUI.fonts.sixth.status, text = VTXDisplay.bandChannel,
-      visible = VTXDisplay.showChannel },
-    { type = "label", color = VTXDisplay.mainColor, font = BOLD,
-      text = VTXDisplay.statusText, visible = VTXDisplay.showStatus },
-    { type = "label", font = SMLSIZE,
-      color = COLOR_THEME_SECONDARY1, text = detailLine },
+    {
+      type = "label",
+      w = c1w,
+      font = WidgetUI.fonts.sixth.status,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.bandChannel,
+      visible = VTXDisplay.showChannel,
+    },
+    {
+      type = "label",
+      font = BOLD,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.statusText,
+      visible = VTXDisplay.showStatus,
+    },
+    {
+      type = "label",
+      font = SMLSIZE,
+      color = COLOR_THEME_SECONDARY1,
+      text = detailLine,
+    },
   }
   local labels = VTXDisplay.build6posLabels()
   for _, lbl in ipairs(labels) do
@@ -111,22 +141,53 @@ end
 function WidgetUI.buildQuarter(w, h, opa)
   local c1w = math.floor(w * 0.28)
   local rows = {
-    { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    { type = "label", align = LEFT, text = VTXDisplay.statusText,
-      color = VTXDisplay.mainColor, font = BOLD,
-      visible = VTXDisplay.showStatus },
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-      align = LEFT + VCENTER, visible = VTXDisplay.showChannel,
+    {
+      type = "label",
+      font = BOLD,
+      color = COLOR_THEME_SECONDARY1,
+      text = "VTX Admin",
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = BOLD,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.statusText,
+      visible = VTXDisplay.showStatus,
+    },
+    {
+      type = "box",
+      w = w,
+      align = LEFT + VCENTER,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_TINY,
+      borderPad = 0,
+      visible = VTXDisplay.showChannel,
       children = {
-      { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
-        color = VTXDisplay.mainColor, font = WidgetUI.fonts.quarter.status },
-      { type = "label", font = SMLSIZE, align = LEFT,
-        text = VTXDisplay.powerShort,
-        color = COLOR_THEME_SECONDARY1 },
-      { type = "label", font = SMLSIZE, align = LEFT,
-        color = pitModeColor,
-        text = pitModeText },
-    }},
+        {
+          type = "label",
+          w = c1w,
+          align = LEFT,
+          font = WidgetUI.fonts.quarter.status,
+          color = VTXDisplay.mainColor,
+          text = VTXDisplay.bandChannel,
+        },
+        {
+          type = "label",
+          align = LEFT,
+          font = SMLSIZE,
+          color = COLOR_THEME_SECONDARY1,
+          text = VTXDisplay.powerShort,
+        },
+        {
+          type = "label",
+          align = LEFT,
+          font = SMLSIZE,
+          color = pitModeColor,
+          text = pitModeText,
+        },
+      },
+    },
   }
   if w < 200 then
     local r1, r2 = buildCheatsheetNarrow()
@@ -152,23 +213,45 @@ function WidgetUI.buildThird(w, h, opa)
   local rows = {}
   -- Title row
   rows[#rows + 1] = {
-    type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1,
+    type = "label",
+    font = BOLD,
+    color = COLOR_THEME_SECONDARY1,
+    text = "VTX Admin",
   }
   -- Loading state: full-width status label
   rows[#rows + 1] = {
-    type = "label", align = LEFT, text = VTXDisplay.statusText,
-    color = VTXDisplay.mainColor, font = BOLD,
+    type = "label",
+    align = LEFT,
+    font = BOLD,
+    color = VTXDisplay.mainColor,
+    text = VTXDisplay.statusText,
     visible = VTXDisplay.showStatus,
   }
   -- Active state: fixed-width band column + detail
   rows[#rows + 1] = {
-    type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-    align = LEFT + VCENTER, visible = VTXDisplay.showChannel,
+    type = "box",
+    w = w,
+    align = LEFT + VCENTER,
+    flexFlow = lvgl.FLOW_ROW,
+    flexPad = lvgl.PAD_TINY,
+    borderPad = 0,
+    visible = VTXDisplay.showChannel,
     children = {
-      { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
-        color = VTXDisplay.mainColor, font = WidgetUI.fonts.third.status },
-      { type = "label", font = SMLSIZE, align = LEFT, text = detailLine,
-        color = COLOR_THEME_SECONDARY1 },
+      {
+        type = "label",
+        w = c1w,
+        align = LEFT,
+        font = WidgetUI.fonts.third.status,
+        color = VTXDisplay.mainColor,
+        text = VTXDisplay.bandChannel,
+      },
+      {
+        type = "label",
+        align = LEFT,
+        font = SMLSIZE,
+        color = COLOR_THEME_SECONDARY1,
+        text = detailLine,
+      },
     },
   }
   -- Cheatsheet rows
@@ -191,14 +274,33 @@ end
 --- 1/2: title + band/channel + detail + cheatsheet.
 function WidgetUI.buildHalf(w, h, opa)
   local rows = {
-    { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    { type = "label", align = LEFT, text = VTXDisplay.statusText,
-      color = VTXDisplay.mainColor, font = BOLD,
-      visible = VTXDisplay.showStatus },
-    { type = "label", align = LEFT, text = VTXDisplay.bandChannel,
-      color = VTXDisplay.mainColor, font = WidgetUI.fonts.half.hero,
-      visible = VTXDisplay.showChannel },
-    { type = "label", font = SMLSIZE, align = LEFT,
+    {
+      type = "label",
+      font = BOLD,
+      color = COLOR_THEME_SECONDARY1,
+      text = "VTX Admin",
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = BOLD,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.statusText,
+      visible = VTXDisplay.showStatus,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = WidgetUI.fonts.half.hero,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.bandChannel,
+      visible = VTXDisplay.showChannel,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = SMLSIZE,
+      color = COLOR_THEME_SECONDARY1,
       text = function()
         if not Protocol.isActive() then
           return ""
@@ -210,7 +312,7 @@ function WidgetUI.buildHalf(w, h, opa)
         local pit = VTX.state.pitmode and "  Pit" or ""
         return table.concat({pwr, pit})
       end,
-      color = COLOR_THEME_SECONDARY1 },
+    },
   }
   if w < 200 then
     local r1, r2 = buildCheatsheetNarrow()
@@ -231,16 +333,35 @@ end
 --- 1/1: title + MIDSIZE band/channel + detail + cheatsheet.
 function WidgetUI.buildFull(w, h, opa)
   local rows = {
-    { type = "label", font = BOLD, text = "VTX Admin", color = COLOR_THEME_SECONDARY1 },
-    { type = "label", align = LEFT, text = VTXDisplay.statusText,
-      color = VTXDisplay.mainColor, font = BOLD,
-      visible = VTXDisplay.showStatus },
-    { type = "label", align = LEFT, text = VTXDisplay.bandChannel,
-      color = VTXDisplay.mainColor, font = WidgetUI.fonts.full.hero,
-      visible = VTXDisplay.showChannel },
-    { type = "label", font = WidgetUI.fonts.full.detail, align = LEFT,
+    {
+      type = "label",
+      font = BOLD,
+      color = COLOR_THEME_SECONDARY1,
+      text = "VTX Admin",
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = BOLD,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.statusText,
+      visible = VTXDisplay.showStatus,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = WidgetUI.fonts.full.hero,
+      color = VTXDisplay.mainColor,
+      text = VTXDisplay.bandChannel,
+      visible = VTXDisplay.showChannel,
+    },
+    {
+      type = "label",
+      align = LEFT,
+      font = WidgetUI.fonts.full.detail,
+      color = COLOR_THEME_SECONDARY1,
       text = VTXDisplay.detailLong,
-      color = COLOR_THEME_SECONDARY1 },
+    },
   }
   if w < 200 then
     local r1, r2 = buildCheatsheetNarrow()
