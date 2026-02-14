@@ -1260,9 +1260,13 @@ function UI.build()
     end
 
     local fieldsInFolder = Protocol.getFieldsInFolder(currentFolder)
-    -- Narrow screens (e.g. FlySky EL18 portrait, PA01) are too narrow for 3 folders per row
-    local FOLDERS_PER_ROW = IS_NARROW and 1 or 3
-    local folderWidth = math.floor(100 / FOLDERS_PER_ROW)
+    local FOLDERS_PER_ROW = 2
+    if IS_NARROW then
+      FOLDERS_PER_ROW = 1       -- FlySky EL18 portrait, PA01 (LCD_W < 400)
+    elseif LCD_W >= 800 then
+      FOLDERS_PER_ROW = 3       -- TX16S MK3 and other HD screens
+    end
+    local folderWidth = math.floor(100 / FOLDERS_PER_ROW) - 1
     local i = 1
     while i <= #fieldsInFolder do
       local field = fieldsInFolder[i]
@@ -1284,8 +1288,9 @@ function UI.build()
           for j = 1, #folderBatch, FOLDERS_PER_ROW do
             local rowContainer = fieldContainer:box({
               w = lvgl.PERCENT_SIZE + 100,
+              borderPad = 0,
               flexFlow = lvgl.FLOW_ROW,
-              flexPad = lvgl.PAD_TINY,
+              flexPad = lvgl.PAD_SMALL,
               align = CENTER,
               color = COLOR_THEME_PRIMARY2
             })
