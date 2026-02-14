@@ -90,14 +90,14 @@ end
 function WidgetUI.buildSmall(w, h, opa)
   local c1w = math.floor(w * 0.30)
   local rows = {
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER, children = {
+    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER, children = {
       { type = "label", w = c1w, font = BOLD, align = LEFT,
         color = heroColorMismatch,
         text = heroTextLq },
       { type = "label", font = SMLSIZE, align = LEFT, color = detailColor,
         text = Telemetry.signalText },
     }},
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, children = {
+    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY, align = LEFT, children = {
       { type = "label", font = SMLSIZE, align = LEFT, color = COLOR_THEME_SECONDARY1,
         text = Telemetry.rfDetailText },
     }},
