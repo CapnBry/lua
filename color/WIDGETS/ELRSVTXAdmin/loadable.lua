@@ -1022,7 +1022,6 @@ end
 local wgt = {
   zone = zone,
   options = options,
-  wasFullScreen = false,
 }
 
 function wgt.background()
@@ -1034,24 +1033,18 @@ end
 
 function wgt.refresh(event, touchState)
   wgt.background()
-
-  local isFullScreen = lvgl.isFullScreen()
-  if isFullScreen ~= wgt.wasFullScreen then
-    wgt.wasFullScreen = isFullScreen
-    if isFullScreen then
-      if Protocol.isReady() then
-        VTX.syncDesiredFromState()
-      end
-      buildFullScreen()
-    else
-      WidgetUI.build(wgt.zone, wgt.options)
-    end
-  end
 end
 
 function wgt.update(newOptions)
   wgt.options = newOptions
-  WidgetUI.build(wgt.zone, wgt.options)
+  if lvgl.isFullScreen() then
+    if Protocol.isReady() then
+      VTX.syncDesiredFromState()
+    end
+    buildFullScreen()
+  else
+    WidgetUI.build(wgt.zone, wgt.options)
+  end
 end
 
 -- Initial build
