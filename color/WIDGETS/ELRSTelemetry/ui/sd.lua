@@ -14,16 +14,16 @@ local WidgetUI = {}
 -- Breakpoints: absolute pixel values for 480x272.
 WidgetUI.breakpoints = {
   topBarW  = 100,
-  tinyH    = 37,
-  smallH   = 52,
+  sixthH   = 37,
+  quarterH = 52,
   thirdH   = 73,
 }
 
 WidgetUI.fonts = {
-  tiny   = { hero = BOLD },
-  small  = { hero = BOLD },
-  third  = { hero = BOLD, detail = SMLSIZE },
-  normal = { hero = MIDSIZE, detail = SMLSIZE },
+  sixth   = { hero = BOLD },
+  quarter = { hero = BOLD },
+  third   = { hero = BOLD, detail = SMLSIZE },
+  full    = { hero = MIDSIZE, detail = SMLSIZE },
 }
 
 -- ============================================================================
@@ -61,9 +61,9 @@ local TopBarUI = loadScript("/WIDGETS/ELRSTelemetry/ui/topbar.lua")({
   crsf = crsf, Telemetry = Telemetry,
 })
 
---- Tiny: single line — LQ (bold) + Range/dBm (colored) + RF mode/Power (neutral).
+--- 1/6: single line — LQ (bold) + Range/dBm (colored) + RF mode/Power (neutral).
 --- Fixed-width columns prevent layout jumping when digit counts change.
-function WidgetUI.buildTiny(w, h, opa)
+function WidgetUI.buildSixth(w, h, opa)
   local c1w = math.floor(w * 0.28)
   local c2w = math.floor(w * 0.40)
   local c3w = w - c1w - c2w
@@ -114,9 +114,9 @@ function WidgetUI.buildTiny(w, h, opa)
   WidgetLayout.row(w, h, opa, columns)
 end
 
---- Small: LQ + Range/dBm on row 1, RF mode + Power on row 2.
+--- 1/4: LQ + Range/dBm on row 1, RF mode + Power on row 2.
 --- Fixed-width first column prevents layout jumping when digit counts change.
-function WidgetUI.buildSmall(w, h, opa)
+function WidgetUI.buildQuarter(w, h, opa)
   local c1w = math.floor(w * 0.30)
   local rows = {
     {
@@ -194,8 +194,8 @@ function WidgetUI.buildThird(w, h, opa)
   WidgetLayout.column(w, h, opa, rows)
 end
 
---- Normal: full telemetry display with title.
-function WidgetUI.buildNormal(w, h, opa)
+--- 1/1: full telemetry display with title.
+function WidgetUI.buildFull(w, h, opa)
   local rows = {
     {
       type = "label",
@@ -219,7 +219,7 @@ function WidgetUI.buildNormal(w, h, opa)
     {
       type = "label",
       align = LEFT,
-      font = WidgetUI.fonts.normal.detail,
+      font = WidgetUI.fonts.full.detail,
       color = detailColor,
       text = Telemetry.signalText,
     },
@@ -258,11 +258,11 @@ function WidgetUI.build(wgtZone, opts)
   local w, h = wgtZone.w, wgtZone.h
   local opa = bgOpacity(opts)
   local bp = WidgetUI.breakpoints
-  if     w < bp.topBarW then TopBarUI.build(w, h)
-  elseif h < bp.tinyH   then WidgetUI.buildTiny(w, h, opa)
-  elseif h < bp.smallH  then WidgetUI.buildSmall(w, h, opa)
-  elseif h < bp.thirdH  then WidgetUI.buildThird(w, h, opa)
-  else                        WidgetUI.buildNormal(w, h, opa)
+  if     w < bp.topBarW  then TopBarUI.build(w, h)
+  elseif h < bp.sixthH   then WidgetUI.buildSixth(w, h, opa)
+  elseif h < bp.quarterH then WidgetUI.buildQuarter(w, h, opa)
+  elseif h < bp.thirdH   then WidgetUI.buildThird(w, h, opa)
+  else                         WidgetUI.buildFull(w, h, opa)
   end
 end
 
