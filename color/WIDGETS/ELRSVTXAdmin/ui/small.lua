@@ -57,19 +57,6 @@ local function pitModeTextLong()
 end
 
 -- ============================================================================
--- Minimized display helpers (small-screen-specific overrides)
--- ============================================================================
-
---- Shorter detail line for compact 320x240 screen.
-local function detailLine()
-  if not Protocol.isActive() then return "" end
-  if VTX.state.band == 0 then return "" end
-  local pwr = VTX.state.power > 0 and table.concat({"P", VTX.state.power}) or "P-"
-  local pit = VTX.state.pitmode and " Pit" or ""
-  return table.concat({pwr, pit})
-end
-
--- ============================================================================
 -- Minimized layout builders (by widget height tier)
 -- ============================================================================
 
@@ -152,7 +139,7 @@ function WidgetUI.buildThird(w, h, opa)
   }
   -- Active state: band + power + pit mode row (no title — too tight on 320x240)
   rows[#rows + 1] = {
-    type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
+    type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY,
     align = LEFT + VCENTER, visible = VTXDisplay.showChannel,
     children = {
       { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
@@ -183,7 +170,7 @@ function WidgetUI.buildHalf(w, h, opa)
     { type = "label", align = LEFT, text = VTXDisplay.bandChannel,
       color = VTXDisplay.mainColor, font = WidgetUI.fonts.half.hero,
       visible = VTXDisplay.showChannel },
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
+    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY,
       align = LEFT + VCENTER, children = {
       { type = "label", font = SMLSIZE, align = LEFT,
         text = VTXDisplay.powerShort,

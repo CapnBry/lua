@@ -196,7 +196,7 @@ function WidgetLayout.column(w, h, opa, children)
     { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
       color = COLOR_THEME_PRIMARY2, opacity = opa },
     { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_COLUMN, flexPad = 0, align = LEFT,
+      flexFlow = lvgl.FLOW_COLUMN, borderPad = lvgl.PAD_SMALL, flexPad = 0, align = LEFT,
       children = children },
   })
 end
@@ -206,7 +206,7 @@ function WidgetLayout.row(w, h, opa, children)
     { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
       color = COLOR_THEME_PRIMARY2, opacity = opa },
     { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER,
+      flexFlow = lvgl.FLOW_ROW, borderPad = lvgl.PAD_SMALL, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER,
       children = children },
   })
 end

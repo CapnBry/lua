@@ -105,7 +105,7 @@ function WidgetUI.buildThird(w, h, opa)
     { type = "label", align = LEFT, text = VTXDisplay.statusText,
       color = VTXDisplay.mainColor, font = BOLD,
       visible = VTXDisplay.showStatus },
-    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
+    { type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY,
       align = LEFT + VCENTER,
       visible = VTXDisplay.showChannel,
       children = {

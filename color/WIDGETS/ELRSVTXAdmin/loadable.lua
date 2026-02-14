@@ -624,7 +624,7 @@ function WidgetLayout.column(w, h, opa, children)
     { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
       color = COLOR_THEME_PRIMARY2, opacity = opa },
     { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_COLUMN, flexPad = 0, align = LEFT,
+      flexFlow = lvgl.FLOW_COLUMN, borderPad = lvgl.PAD_SMALL, flexPad = 0, align = LEFT,
       children = children },
   })
 end
@@ -634,7 +634,7 @@ function WidgetLayout.row(w, h, opa, children)
     { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = true,
       color = COLOR_THEME_PRIMARY2, opacity = opa },
     { type = "box", x = 0, y = 0, w = w, h = h,
-      flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER,
+      flexFlow = lvgl.FLOW_ROW, borderPad = lvgl.PAD_SMALL, flexPad = lvgl.PAD_TINY, align = LEFT + VCENTER,
       children = children },
   })
 end
@@ -729,8 +729,12 @@ function VTXDisplay.buildCheatsheet()
   local labels = VTXDisplay.build6posLabels()
   if #labels == 0 then return nil end
   return {
-    type = "box", flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
-    align = LEFT, visible = function() return Protocol.state ~= Protocol.STATE_NO_MODULE end,
+    type = "box",
+    flexFlow = lvgl.FLOW_ROW,
+    borderPad = 0,
+    flexPad = lvgl.PAD_TINY,
+    align = LEFT,
+    visible = function() return Protocol.state ~= Protocol.STATE_NO_MODULE end,
     children = labels,
   }
 end

@@ -71,8 +71,8 @@ local function buildCheatsheetNarrow()
   for i = 4, 6 do row2[#row2 + 1] = labels[i] end
   local vis = function() return Protocol.state ~= Protocol.STATE_NO_MODULE end
   return
-    { type = "box", flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row1 },
-    { type = "box", flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row2 }
+    { type = "box", flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row1 },
+    { type = "box", flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY, align = LEFT, visible = vis, children = row2 }
 end
 
 -- ============================================================================
@@ -162,7 +162,7 @@ function WidgetUI.buildThird(w, h, opa)
   }
   -- Active state: fixed-width band column + detail
   rows[#rows + 1] = {
-    type = "box", w = w, flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_TINY,
+    type = "box", w = w, flexFlow = lvgl.FLOW_ROW, borderPad = 0, flexPad = lvgl.PAD_TINY,
     align = LEFT + VCENTER, visible = VTXDisplay.showChannel,
     children = {
       { type = "label", w = c1w, align = LEFT, text = VTXDisplay.bandChannel,
