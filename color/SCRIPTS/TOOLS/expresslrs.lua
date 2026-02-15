@@ -58,24 +58,25 @@ function App.checkCrsfModule()
   return App.crsfModuleFound
 end
 
--- Coordinator: changes device and triggers UI update
--- When switching to a DIFFERENT device (user action), pushes a device entry
--- onto the navigation stack so the user can navigate back.
--- When the SAME device is updated (initial setup), just resets navigation.
-function App.changeDevice(devId)
-  local device = Protocol.getDevice(devId)
+--- Active device announced/re-announced. Resets navigation (field tree rebuilding).
+function App.loadDevice(device)
+  if Protocol.setDevice(device) then
+    Navigation.reset()
+    UI.invalidate()
+  end
+end
+
+--- User picked a different device from "Other Devices" list.
+--- Pushes a navigation entry so Back returns to previous device.
+function App.userSwitchDevice(deviceId)
+  local device = Protocol.getDevice(deviceId)
   if not device then
     return
   end
   local prevDeviceId = Protocol.deviceId
-  local isSwitching = (prevDeviceId ~= devId)
   if Protocol.setDevice(device) then
-    if isSwitching then
-      Navigation.openDevice(device.name, prevDeviceId)
-    else
-      Navigation.reset()
-    end
-    return UI.invalidate()
+    Navigation.openDevice(device.name, prevDeviceId)
+    UI.invalidate()
   end
 end
 
@@ -347,14 +348,14 @@ function Protocol.setDevice(device)
   if not device then
     return false
   end
-  if Protocol.deviceId == device.id and Protocol.fieldsCount == device.fldcnt then
+  if Protocol.deviceId == device.id and Protocol.fieldsCount == device.fieldCount then
     return false
   end
 
   Protocol.deviceId = device.id
   Protocol.elrsFlags = 0
   Protocol.deviceName = device.name
-  Protocol.fieldsCount = device.fldcnt
+  Protocol.fieldsCount = device.fieldCount
   Protocol.deviceIsELRS_TX = device.isElrs and device.id == Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER or nil
   Protocol.handsetId = Protocol.deviceIsELRS_TX and Protocol.CRSF.ADDRESS_ELRS_LUA or Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER
 
@@ -755,14 +756,9 @@ function Protocol.parseDeviceInfoMessage(data)
     Protocol.devices[#Protocol.devices + 1] = device
   end
   device.name = newName
-  device.fldcnt = data[offset + 12]
+  device.fieldCount = data[offset + 12]
   device.isElrs = Protocol.fieldGetValue(data, offset, 4) == Protocol.CRSF.ELRS_SERIAL_ID
-
-  -- Return signal - caller handles device change and navigation
-  -- shouldChangeDevice: true if this is info about the currently selected device
-  -- isNewDevice: true if this device was not previously known
-  local shouldChangeDevice = (Protocol.deviceId == id)
-  return { shouldChangeDevice = shouldChangeDevice, deviceId = id, isNewDevice = isNew }
+  return device, isNew
 end
 
 function Protocol.parseParameterInfoMessage(data)
@@ -856,17 +852,24 @@ function Protocol.parseElrsV1Message(data)
 end
 
 -- ============================================================================
--- Protocol: Main CRSF communication loop (renamed from refreshNext)
+-- Protocol: Main CRSF communication loop
 -- ============================================================================
 
 function Protocol.poll()
   local command, data
-  local deviceInfoResult = nil
+  local targetDevice = nil
+  local anyNewDevice = false
 
   repeat
     command, data = Protocol.pop()
     if command == Protocol.CRSF.FRAMETYPE_DEVICE_INFO then
-      deviceInfoResult = Protocol.parseDeviceInfoMessage(data)
+      local device, isNew = Protocol.parseDeviceInfoMessage(data)
+      if device.id == Protocol.deviceId then
+        targetDevice = device
+      end
+      if isNew then
+        anyNewDevice = true
+      end
     elseif command == Protocol.CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY then
       Protocol.parseParameterInfoMessage(data)
       if #Protocol.loadQueue > 0 then
@@ -881,6 +884,10 @@ function Protocol.poll()
     end
   until command == nil
 
+  return targetDevice, anyNewDevice
+end
+
+function Protocol.tick()
   -- Auto-discover other devices when link transitions to connected
   local connected = Protocol.isConnected()
   if connected and not Protocol.wasConnected and #Protocol.devices <= 1 then
@@ -923,8 +930,6 @@ function Protocol.poll()
       Protocol.backgroundLoading = false
     end
   end
-
-  return { deviceInfo = deviceInfoResult }
 end
 
 -- ============================================================================
@@ -1298,7 +1303,7 @@ function UI.build()
           text = device.name or "Unknown",
           w = lvgl.PERCENT_SIZE + 100,
           press = function()
-            App.changeDevice(device.id)
+            App.userSwitchDevice(device.id)
           end
         })
       end
@@ -1916,7 +1921,8 @@ local function run(event, touchState)
   end
 
   -- CRSF polling
-  local pollResult = Protocol.poll()
+  local targetDevice, anyNewDevice = Protocol.poll()
+  Protocol.tick()
 
   -- Check for ELRS 1.x firmware (unsupported)
   if Protocol.elrsV1Detected then
@@ -1930,20 +1936,14 @@ local function run(event, touchState)
     return 0
   end
 
-  -- Handle device info update
-  if pollResult.deviceInfo then
-    -- Change device if protocol indicates current device was updated
-    if pollResult.deviceInfo.shouldChangeDevice then
-      App.changeDevice(pollResult.deviceInfo.deviceId)
-    end
-    -- Refresh UI if a new device appeared (shows "Other Devices" button at root,
-    -- or updates the device list if already viewing that folder).
-    -- At root level, wait until the folder has finished loading before rebuilding.
-    if pollResult.deviceInfo.isNewDevice and UI.folderWasReady then
-      UI.invalidate()
-    elseif Navigation.getCurrent() == Navigation.FOLDER_OTHER_DEVICES then
-      UI.invalidate()
-    end
+  -- Activate the target device if it announced/re-announced this cycle
+  if targetDevice then
+    App.loadDevice(targetDevice)
+  end
+  -- Refresh UI if a new device appeared (shows "Other Devices" button at root,
+  -- or updates the device list if already viewing that folder).
+  if anyNewDevice and (Navigation.getCurrent() == Navigation.FOLDER_OTHER_DEVICES or UI.folderWasReady) then
+    UI.invalidate()
   end
 
   -- Handle command popups
