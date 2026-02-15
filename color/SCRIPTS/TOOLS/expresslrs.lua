@@ -242,7 +242,6 @@ Protocol = {
 
   -- Devices collection
   devices = {},
-  devicesRefreshTimeout = 50,
 
   -- Status/flags (parsed from ELRS info messages)
   elrsFlags = 0,
@@ -253,6 +252,7 @@ Protocol = {
 
   -- Protocol timing
   linkstatTimeout = 100,
+  pingTimeout = 0,
 
   -- Communication state
   fieldTimeout = 0,
@@ -281,7 +281,6 @@ function Protocol.reset()
 
   -- Devices collection
   Protocol.devices = {}
-  Protocol.devicesRefreshTimeout = 50
 
   -- Status/flags
   Protocol.elrsFlags = 0
@@ -292,6 +291,7 @@ function Protocol.reset()
 
   -- Protocol timing
   Protocol.linkstatTimeout = 100
+  Protocol.pingTimeout = 0
 
   -- Communication state
   Protocol.fieldTimeout = 0
@@ -872,20 +872,28 @@ function Protocol.tick()
   -- Auto-discover other devices when link transitions to connected
   local connected = Protocol.isConnected()
   if connected and not Protocol.wasConnected and #Protocol.devices <= 1 then
-    Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
-    Protocol.devicesRefreshTimeout = getTime() + 100
+    Protocol.pingTimeout = 0
   end
   Protocol.wasConnected = connected
 
   local time = getTime()
+  -- Ping the radio transmitter to discover other devices
+  -- We do this every 3 seconds to ensure we always have the latest device list
+  -- On initial connection, we ping immediately to discover other devices
+  if time > Protocol.pingTimeout then
+    Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
+    if #Protocol.devices == 0 then
+      Protocol.pingTimeout = time + 100 -- 1s fast discovery
+    else
+      Protocol.pingTimeout = time + 500 -- 5s
+    end
+  end
+
   if Protocol.fieldPopup then
     if time > Protocol.fieldTimeout and Protocol.fieldPopup.status ~= Protocol.CRSF.CMD_ASKCONFIRM then
       Protocol.push(Protocol.CRSF.FRAMETYPE_PARAMETER_WRITE, { Protocol.deviceId, Protocol.handsetId, Protocol.fieldPopup.id, Protocol.CRSF.CMD_QUERY })
       Protocol.fieldTimeout = time + Protocol.fieldPopup.timeout
     end
-  elseif time > Protocol.devicesRefreshTimeout and #Protocol.devices == 0 then
-    Protocol.devicesRefreshTimeout = time + 100
-    Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
   elseif time > Protocol.linkstatTimeout then
     if Protocol.deviceIsELRS_TX then
       Protocol.push(Protocol.CRSF.FRAMETYPE_PARAMETER_WRITE, { Protocol.deviceId, Protocol.handsetId, 0x0, 0x0 })
