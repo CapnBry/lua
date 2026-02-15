@@ -1380,29 +1380,17 @@ function UI.drawPopup(event)
 end
 
 -- ============================================================================
--- No Module screen (from elrs.lua checkCrsfModule error display)
+-- Alert screen (clear screen + title + body messages)
 -- ============================================================================
 
-local function drawNoModule()
+local function drawAlert(title, msgs)
   lcd.clear()
   local y = 0
-  lcd.drawText(2, y, "  No ExpressLRS", MIDSIZE)
+  lcd.drawText(2, y, title, MIDSIZE)
   y = y + (UI.textSize * 2) - 2
-  local msgs = {
-    " Enable a CRSF Internal",
-    "   or External module in",
-    "       Model settings",
-    "  If module is internal",
-    " also set Internal RF to",
-    " CRSF in SYS->Hardware",
-  }
-  for i, msg in ipairs(msgs) do
+  for _, msg in ipairs(msgs) do
     lcd.drawText(2, y, msg)
     y = y + UI.textSize
-    if i == 3 then
-      lcd.drawLine(0, y, LCD_W, y, SOLID, INVERS)
-      y = y + 2
-    end
   end
 end
 
@@ -1447,7 +1435,14 @@ local function run(event, touchState)
 
   -- Check for CRSF module
   if not App.checkCrsfModule() then
-    drawNoModule()
+    drawAlert("  No ExpressLRS", {
+      " Enable a CRSF Internal",
+      "   or External module in",
+      "       Model settings",
+      "  If module is internal",
+      " also set Internal RF to",
+      " CRSF in SYS->Hardware",
+    })
     return 0
   end
 
@@ -1457,10 +1452,10 @@ local function run(event, touchState)
 
   -- Check for ELRS 1.x firmware (unsupported)
   if Protocol.elrsV1Detected then
-    lcd.clear()
-    lcd.drawText(2, 0, "Unsupported Firmware", MIDSIZE)
-    lcd.drawText(2, UI.textSize * 3, "ELRS 1.x firmware detected.")
-    lcd.drawText(2, UI.textSize * 4, "Please update to 3.x.")
+    drawAlert("Unsupported Firmware", {
+      "ELRS 1.x firmware detected.",
+      "Please update to 3.x.",
+    })
     return 0
   end
 
