@@ -82,7 +82,6 @@ end
 
 -- Coordinator: opens a folder, loads its children, and refreshes UI
 function App.openFolder(folderId, folderName)
-  Protocol.flushPendingSaves()
   Navigation.openFolder(folderId, folderName)
   Protocol.loadFolderChildren(folderId)
   return UI.invalidate()
@@ -90,7 +89,6 @@ end
 
 -- Back button handler: navigate back or show exit confirmation
 function App.handleBack()
-  Protocol.flushPendingSaves()
   if Navigation.isAtRoot() then
     Dialogs.showConfirm({
       title = "Exit",
@@ -264,10 +262,6 @@ Protocol = {
   expectChunksRemain = -1,
   backgroundLoading = false,
 
-  -- Debounce: deferred saves for continuous controls (numberEdit)
-  DEBOUNCE_SAVE_DELAY = 30,  -- 300ms in getTime() ticks (10ms each)
-  pendingSaves = {},  -- keyed by field.id: { field, timeout }
-
   -- Connection transition tracking (for auto-discovery on reconnect)
   wasConnected = false,
 }
@@ -306,7 +300,6 @@ function Protocol.reset()
   Protocol.loadQueue = {}
   Protocol.expectChunksRemain = -1
   Protocol.backgroundLoading = false
-  Protocol.pendingSaves = {}
   Protocol.wasConnected = false
 end
 
@@ -657,18 +650,6 @@ function Protocol.reloadParentFolder(field)
   end
 end
 
-function Protocol.debounceSave(field)
-  Protocol.pendingSaves[field.id] = { field = field, timeout = getTime() + Protocol.DEBOUNCE_SAVE_DELAY }
-end
-
-function Protocol.flushPendingSaves()
-  for id, ps in pairs(Protocol.pendingSaves) do
-    Protocol.pendingSaves[id] = nil
-    Protocol.fieldIntSave(ps.field)
-    Protocol.reloadParentFolder(ps.field)
-  end
-end
-
 function Protocol.reloadRelatedFields(field)
   Protocol.reloadParentFolder(field)
 
@@ -897,15 +878,6 @@ function Protocol.tick()
   Protocol.wasConnected = connected
 
   local time = getTime()
-  -- Flush any debounced saves whose timer has expired
-  for id, ps in pairs(Protocol.pendingSaves) do
-    if time > ps.timeout then
-      Protocol.pendingSaves[id] = nil
-      Protocol.fieldIntSave(ps.field)
-      Protocol.reloadParentFolder(ps.field)
-    end
-  end
-
   if Protocol.fieldPopup then
     if time > Protocol.fieldTimeout and Protocol.fieldPopup.status ~= Protocol.CRSF.CMD_ASKCONFIRM then
       Protocol.push(Protocol.CRSF.FRAMETYPE_PARAMETER_WRITE, { Protocol.deviceId, Protocol.handsetId, Protocol.fieldPopup.id, Protocol.CRSF.CMD_QUERY })
