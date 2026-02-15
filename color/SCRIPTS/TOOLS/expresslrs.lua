@@ -248,6 +248,7 @@ Protocol = {
   -- Status/flags (parsed from ELRS info messages)
   elrsFlags = 0,
   elrsFlagsInfo = "",
+  elrsV1Detected = false,
   receivedPackets = nil,
   lostPackets = nil,
 
@@ -290,6 +291,7 @@ function Protocol.reset()
   -- Status/flags
   Protocol.elrsFlags = 0
   Protocol.elrsFlagsInfo = ""
+  Protocol.elrsV1Detected = false
   Protocol.receivedPackets = nil
   Protocol.lostPackets = nil
 
@@ -850,8 +852,7 @@ function Protocol.parseElrsV1Message(data)
   if (data[1] ~= Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER) or (data[2] ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER) then
     return
   end
-  Protocol.fieldPopup = { id = 0, status = Protocol.CRSF.CMD_EXECUTING, timeout = 0xFF, info = "ERROR: 1.x firmware" }
-  Protocol.fieldTimeout = getTime() + 0xFFFF
+  Protocol.elrsV1Detected = true
 end
 
 -- ============================================================================
@@ -1916,6 +1917,18 @@ local function run(event, touchState)
 
   -- CRSF polling
   local pollResult = Protocol.poll()
+
+  -- Check for ELRS 1.x firmware (unsupported)
+  if Protocol.elrsV1Detected then
+    if not UI.uiBuilt then
+      Dialogs.showMessage({
+        title = "Unsupported Firmware",
+        message = "ELRS 1.x firmware detected. Please update to 3.x.",
+      })
+      UI.uiBuilt = true
+    end
+    return 0
+  end
 
   -- Handle device info update
   if pollResult.deviceInfo then
