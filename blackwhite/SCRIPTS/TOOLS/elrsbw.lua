@@ -77,23 +77,29 @@ function App.checkCrsfModule()
   return App.crsfModuleFound
 end
 
--- Coordinator: changes device and triggers UI update
-function App.changeDevice(devId)
-  local device = Protocol.getDevice(devId)
+--- Active device announced/re-announced. Resets navigation (field tree rebuilding).
+function App.loadDevice(device)
+  if Protocol.setDevice(device) then
+    Navigation.reset()
+    UI.lineIndex = 1
+    UI.pageOffset = 0
+    UI.invalidate()
+  end
+end
+
+--- User picked a different device from "Other Devices" list.
+--- Pushes a navigation entry so Back returns to previous device.
+function App.userSwitchDevice(deviceId)
+  local device = Protocol.getDevice(deviceId)
   if not device then
     return
   end
   local prevDeviceId = Protocol.deviceId
-  local isSwitching = (prevDeviceId ~= devId)
   if Protocol.setDevice(device) then
-    if isSwitching then
-      Navigation.openDevice(device.name, prevDeviceId)
-    else
-      Navigation.reset()
-    end
+    Navigation.openDevice(device.name, prevDeviceId)
     UI.lineIndex = 1
     UI.pageOffset = 0
-    return UI.invalidate()
+    UI.invalidate()
   end
 end
 
@@ -113,7 +119,10 @@ function App.handleBack()
   if Navigation.isAtRoot() then
     -- At root: reload everything (like original elrs.lua)
     if Protocol.deviceId ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER then
-      App.changeDevice(Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER)
+      local txDevice = Protocol.getDevice(Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER)
+      if txDevice then
+        App.loadDevice(txDevice)
+      end
     else
       Protocol.allocateFields()
       Protocol.reloadAllFields()
@@ -371,14 +380,14 @@ function Protocol.setDevice(device)
   if not device then
     return false
   end
-  if Protocol.deviceId == device.id and Protocol.fieldsCount == device.fldcnt then
+  if Protocol.deviceId == device.id and Protocol.fieldsCount == device.fieldCount then
     return false
   end
 
   Protocol.deviceId = device.id
   Protocol.elrsFlags = 0
   Protocol.deviceName = device.name
-  Protocol.fieldsCount = device.fldcnt
+  Protocol.fieldsCount = device.fieldCount
   Protocol.deviceIsELRS_TX = device.isElrs and device.id == Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER or nil
   Protocol.handsetId = Protocol.deviceIsELRS_TX and Protocol.CRSF.ADDRESS_ELRS_LUA or Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER
 
@@ -755,11 +764,9 @@ function Protocol.parseDeviceInfoMessage(data)
     Protocol.devices[#Protocol.devices + 1] = device
   end
   device.name = newName
-  device.fldcnt = data[offset + 12]
+  device.fieldCount = data[offset + 12]
   device.isElrs = Protocol.fieldGetValue(data, offset, 4) == Protocol.CRSF.ELRS_SERIAL_ID
-
-  local shouldChangeDevice = (Protocol.deviceId == id)
-  return { shouldChangeDevice = shouldChangeDevice, deviceId = id, isNewDevice = isNew }
+  return device, isNew
 end
 
 function Protocol.parseParameterInfoMessage(data)
@@ -847,8 +854,7 @@ function Protocol.parseElrsV1Message(data)
   if (data[1] ~= Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER) or (data[2] ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER) then
     return
   end
-  Protocol.fieldPopup = { id = 0, status = Protocol.CRSF.CMD_EXECUTING, timeout = 0xFF, info = "ERROR: 1.x firmware" }
-  Protocol.fieldTimeout = getTime() + 0xFFFF
+  Protocol.elrsV1Detected = true
 end
 
 -- ============================================================================
@@ -857,12 +863,19 @@ end
 
 function Protocol.poll()
   local command, data
-  local deviceInfoResult = nil
+  local targetDevice = nil
+  local anyNewDevice = false
 
   repeat
     command, data = Protocol.pop()
     if command == Protocol.CRSF.FRAMETYPE_DEVICE_INFO then
-      deviceInfoResult = Protocol.parseDeviceInfoMessage(data)
+      local device, isNew = Protocol.parseDeviceInfoMessage(data)
+      if device.id == Protocol.deviceId then
+        targetDevice = device
+      end
+      if isNew then
+        anyNewDevice = true
+      end
     elseif command == Protocol.CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY then
       Protocol.parseParameterInfoMessage(data)
       if #Protocol.loadQueue > 0 then
@@ -877,6 +890,10 @@ function Protocol.poll()
     end
   until command == nil
 
+  return targetDevice, anyNewDevice
+end
+
+function Protocol.tick()
   -- Auto-discover other devices when link transitions to connected
   local connected = Protocol.isConnected()
   if connected and not Protocol.wasConnected and #Protocol.devices <= 1 then
@@ -919,8 +936,6 @@ function Protocol.poll()
       Protocol.backgroundLoading = false
     end
   end
-
-  return { deviceInfo = deviceInfoResult }
 end
 
 -- ============================================================================
@@ -1138,8 +1153,7 @@ local function fieldFloatDisplay(field, y, attr)
 end
 
 local function fieldTextSelDisplay(field, y, attr)
-  lcd.drawText(UI.COL2, y, field.values[field.value + 1] or "ERR", attr)
-  lcd.drawText(lcd.getLastPos(), y, field.unit, 0)
+  lcd.drawText(UI.COL2, y, (field.values[field.value + 1] or "ERR") .. field.unit, attr)
 end
 
 local function fieldStringDisplay(field, y, attr)
@@ -1251,7 +1265,7 @@ function UI.handleEvent(event)
         elseif ft == Protocol.CRSF.DEVICE_FOLDER then
           App.openFolder(Navigation.FOLDER_OTHER_DEVICES, "Other Devices")
         elseif ft == Protocol.CRSF.DEVICE then
-          App.changeDevice(field.id)
+          App.userSwitchDevice(field.id)
         elseif ft == Protocol.CRSF.COMMAND then
           Protocol.handleCommandSave(field)
         elseif not field.disabled and ft <= Protocol.CRSF.TEXT_SELECTION then
@@ -1438,18 +1452,25 @@ local function run(event, touchState)
   end
 
   -- CRSF polling
-  local pollResult = Protocol.poll()
+  local targetDevice, anyNewDevice = Protocol.poll()
+  Protocol.tick()
 
-  -- Handle device info update
-  if pollResult.deviceInfo then
-    if pollResult.deviceInfo.shouldChangeDevice then
-      App.changeDevice(pollResult.deviceInfo.deviceId)
-    end
-    if pollResult.deviceInfo.isNewDevice then
-      UI.invalidate()
-    elseif Navigation.getCurrent() == Navigation.FOLDER_OTHER_DEVICES then
-      UI.invalidate()
-    end
+  -- Check for ELRS 1.x firmware (unsupported)
+  if Protocol.elrsV1Detected then
+    lcd.clear()
+    lcd.drawText(2, 0, "Unsupported Firmware", MIDSIZE)
+    lcd.drawText(2, UI.textSize * 3, "ELRS 1.x firmware detected.")
+    lcd.drawText(2, UI.textSize * 4, "Please update to 3.x.")
+    return 0
+  end
+
+  -- Activate the target device if it announced/re-announced this cycle
+  if targetDevice then
+    App.loadDevice(targetDevice)
+  end
+  -- Refresh UI if a new device appeared
+  if anyNewDevice then
+    UI.invalidate()
   end
 
   -- Warning flashing timer
