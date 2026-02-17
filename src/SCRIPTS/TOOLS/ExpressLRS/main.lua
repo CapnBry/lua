@@ -125,7 +125,6 @@ local function init()
     App = App,
     Navigation = Navigation,
     Protocol = Protocol,
-    shim = shim,
     VERSION = VERSION,
   }
   if useLvgl then
