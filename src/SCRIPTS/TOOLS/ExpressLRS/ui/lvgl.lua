@@ -633,14 +633,14 @@ end
 function UI.getSubtitle()
   if not Navigation.isAtRoot() then
     local top = Navigation.stack[#Navigation.stack]
-    local path = top.name or ""
+    local subtitleParts = {top.name or ""}
 
     local loaded, total = Protocol.getFolderLoadProgress(Navigation.getCurrent())
     if loaded and loaded < total then
-      path = path .. string.format(" • Loading %d%%", math.floor(loaded / total * 100))
+      subtitleParts[#subtitleParts + 1] = string.format(" • Loading %d%%", math.floor(loaded / total * 100))
     end
 
-    return path
+    return table.concat(subtitleParts)
   end
 
   local loaded, total = Protocol.getFolderLoadProgress(nil)
@@ -656,7 +656,7 @@ function UI.getSubtitle()
 
   if Protocol.elrsFlags > Protocol.CRSF.ELRS_FLAGS_STATUS_MASK and Protocol.elrsFlagsInfo and Protocol.elrsFlagsInfo ~= "" then
     if subtitle ~= "" then
-      subtitle = subtitle .. " • " .. Protocol.elrsFlagsInfo
+      subtitle = table.concat({subtitle, " • ", Protocol.elrsFlagsInfo})
     else
       subtitle = Protocol.elrsFlagsInfo
     end
@@ -780,7 +780,7 @@ function UI.createChoiceRow(pg, field)
           {
               type = lvgl.LABEL,
               y = lvgl.PAD_SMALL,
-              text = " " .. field.unit,
+              text = table.concat({" ", field.unit}),
           }
       }
     })
@@ -795,7 +795,7 @@ function UI.createNumberRow(pg, field)
     end
   else
     displayFn = function(val)
-      return tostring(val) .. (field.unit or "")
+      return table.concat({tostring(val), field.unit or ""})
     end
   end
 
