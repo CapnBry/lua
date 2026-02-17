@@ -48,7 +48,7 @@ The shared library `SCRIPTS/ELRS/crsf.lua` is required by both widgets.
 
 The main tool (`SCRIPTS/TOOLS/ExpressLRS/`) lets you configure your ExpressLRS transmitter and receiver settings directly from your radio.
 
-![ExpressLRS Configuration Tool](screenshots/tool_main.png)
+<img src="screenshots/tool_main.png" width="472" alt="ExpressLRS Configuration Tool">
 
 ### Architecture
 
@@ -65,19 +65,19 @@ The main tool (`SCRIPTS/TOOLS/ExpressLRS/`) lets you configure your ExpressLRS t
 
 Both widgets running side-by-side on the home screen:
 
-![ELRS Widgets](screenshots/widgets.png)
+<img src="screenshots/widgets.png" width="472" alt="ELRS Widgets">
 
 ## ELRS Telemetry Widget
 
 The telemetry widget (`WIDGETS/ELRSTelemetry/`) displays real-time link statistics on your home screen: link quality, RSSI, range, RF mode, TX power, battery voltage, current, GPS, and flight mode. It supports multiple screen resolutions (800x480, 480x320, 480x272, 320x480, 320x240).
 
-![ELRS Telemetry Widget](screenshots/widget_telemetry_fullscren.png)
+<img src="screenshots/widget_telemetry_fullscren.png" width="472" alt="ELRS Telemetry Widget">
 
 ## VTX Administrator Widget
 
 The VTX Administrator widget (`WIDGETS/ELRSVTXAdmin/`) provides control over your video transmitter settings -- band, channel, power level, and pit mode -- directly from your radio telemetry screen. It also supports 6POS quick change for rapid VTX channel switching via a 6POS switch.
 
-![VTX Administrator Widget](screenshots/widget_vtxadmin_fullscreen.png)
+<img src="screenshots/widget_vtxadmin_fullscreen.png" width="472" alt="VTX Administrator Widget">
 
 ## CRSF Simulator (Testing)
 
