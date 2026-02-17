@@ -409,7 +409,7 @@ function Protocol.fieldFloatLoad(field, data, offset)
     field.prec = 3
   end
   field.step = Protocol.fieldGetValue(data, offset + 17, 4)
-  field.fmt = "%." .. tostring(field.prec) .. "f" .. field.unit
+  field.fmt = shim.tableConcat({"%.", tostring(field.prec), "f", field.unit})
   field.prec = 10 ^ field.prec
 end
 
