@@ -125,8 +125,7 @@ function App.handleBack()
       Protocol.allocateFields()
       Protocol.reloadAllFields()
     end
-    Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING,
-      { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
+    Protocol.pingDevices()
   else
     local entry = Navigation.goBack()
     if entry then
@@ -349,6 +348,10 @@ end
 
 function Protocol.push(command, data)
   return crossfireTelemetryPush(command, data)
+end
+
+function Protocol.pingDevices()
+  Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
 end
 
 function Protocol.isConnected()
@@ -875,21 +878,18 @@ function Protocol.poll()
 end
 
 function Protocol.tick()
-  -- Auto-discover other devices when link transitions to connected
+  -- Ping on connection transition (device may have changed)
   local connected = Protocol.isConnected()
-  if connected and not Protocol.wasConnected and #Protocol.devices <= 1 then
-    Protocol.pingTimeout = 0
+  if connected and not Protocol.wasConnected then
+    Protocol.pingDevices()
   end
   Protocol.wasConnected = connected
 
   local time = getTime()
-  if time > Protocol.pingTimeout then
-    Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER })
-    if #Protocol.devices == 0 then
-      Protocol.pingTimeout = time + 100 -- 1s fast discovery
-    else
-      Protocol.pingTimeout = time + 500 -- 5s
-    end
+  -- Periodic ping for initial device discovery
+  if #Protocol.devices == 0 and time > Protocol.pingTimeout then
+    Protocol.pingDevices()
+    Protocol.pingTimeout = time + 100 -- 1s
   end
 
   if Protocol.fieldPopup then
