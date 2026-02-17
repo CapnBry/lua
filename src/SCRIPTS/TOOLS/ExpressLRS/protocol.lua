@@ -332,6 +332,8 @@ function Protocol.fieldGetStrOrOpts(data, offset, last, isOpts)
   local r = last or (isOpts and {})
   local optParts = {}
   local vcnt = 0
+  local charUp = CHAR_UP or (__opentx and __opentx.CHAR_UP)
+  local charDown = CHAR_DOWN or (__opentx and __opentx.CHAR_DOWN)
   repeat
     local b = data[offset]
     offset = offset + 1
@@ -346,10 +348,13 @@ function Protocol.fieldGetStrOrOpts(data, offset, last, isOpts)
       elseif b ~= 0 then
         -- Translate legacy OpenTX arrow bytes (0xC0/0xC1) from ELRS firmware
         -- to EdgeTX CHAR_UP/CHAR_DOWN glyphs
-        optParts[#optParts + 1] = ({
-          [192] = CHAR_UP or (__opentx and __opentx.CHAR_UP),
-          [193] = CHAR_DOWN or (__opentx and __opentx.CHAR_DOWN)
-        })[b] or string.char(b)
+        if b == 192 and charUp then
+          optParts[#optParts + 1] = charUp
+        elseif b == 193 and charDown then
+          optParts[#optParts + 1] = charDown
+        else
+          optParts[#optParts + 1] = string.char(b)
+        end
       end
     end
   until b == 0
