@@ -378,7 +378,8 @@ local function fieldUnsignedLoad(field, data, offset, size, unitoffset)
   field.value = Protocol.fieldGetValue(data, offset, size)
   field.min = Protocol.fieldGetValue(data, offset + size, size)
   field.max = Protocol.fieldGetValue(data, offset + 2 * size, size)
-  field.unit = Protocol.fieldGetStrOrOpts(data, offset + (unitoffset or (4 * size)), field.unit)
+  local unit = Protocol.fieldGetStrOrOpts(data, offset + (unitoffset or (4 * size)), field.unit)
+  field.unit = (unit ~= "") and unit or nil
   if size ~= 1 then
     field.size = size
   end
@@ -409,7 +410,7 @@ function Protocol.fieldFloatLoad(field, data, offset)
     field.prec = 3
   end
   field.step = Protocol.fieldGetValue(data, offset + 17, 4)
-  field.fmt = shim.tableConcat({"%.", tostring(field.prec), "f", field.unit})
+  field.fmt = shim.tableConcat({"%.", tostring(field.prec), "f", field.unit or ""})
   field.prec = 10 ^ field.prec
 end
 
@@ -418,10 +419,11 @@ function Protocol.fieldTextSelLoad(field, data, offset)
   local cached = field.dirty == nil and field.values
   field.values, offset, vcnt = Protocol.fieldGetStrOrOpts(data, offset, cached, true)
   if not cached then
-    field.disabled = vcnt <= 1
+    field.disabled = (vcnt <= 1) or nil
   end
   field.value = data[offset]
-  field.unit = Protocol.fieldGetStrOrOpts(data, offset + 4)
+  local unit = Protocol.fieldGetStrOrOpts(data, offset + 4)
+  field.unit = (unit ~= "") and unit or nil
   field.dirty = nil
 end
 
@@ -435,7 +437,8 @@ end
 function Protocol.fieldCommandLoad(field, data, offset)
   field.status = data[offset]
   field.timeout = data[offset + 1]
-  field.info = Protocol.fieldGetStrOrOpts(data, offset + 2)
+  local info = Protocol.fieldGetStrOrOpts(data, offset + 2)
+  field.info = (info ~= "") and info or nil
   if field.status == Protocol.CRSF.CMD_IDLE then
     Protocol.fieldPopup = nil
   end

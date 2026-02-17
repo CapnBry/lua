@@ -341,7 +341,7 @@ end
 -- ============================================================================
 
 local function fieldIntDisplay(field, y, attr)
-  lcd.drawText(UI.COL2, y, field.value .. field.unit, attr)
+  lcd.drawText(UI.COL2, y, field.value .. (field.unit or ""), attr)
 end
 
 local function fieldFloatDisplay(field, y, attr)
@@ -349,7 +349,7 @@ local function fieldFloatDisplay(field, y, attr)
 end
 
 local function fieldTextSelDisplay(field, y, attr)
-  lcd.drawText(UI.COL2, y, (field.values[field.value + 1] or "ERR") .. field.unit, attr)
+  lcd.drawText(UI.COL2, y, (field.values[field.value + 1] or "ERR") .. (field.unit or ""), attr)
 end
 
 local function fieldStringDisplay(field, y, attr)
@@ -540,11 +540,11 @@ function UI.drawPopup(event)
   end
 
   if Protocol.fieldPopup.status == Protocol.CRSF.CMD_IDLE and Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_IDLE then
-    popupCompat(Protocol.fieldPopup.info, "Stopped!", event)
+    popupCompat(Protocol.fieldPopup.info or "", "Stopped!", event)
     Protocol.reloadAllFields()
     Protocol.fieldPopup = nil
   elseif Protocol.fieldPopup.status == Protocol.CRSF.CMD_ASKCONFIRM then
-    local result = popupCompat(Protocol.fieldPopup.info, "PRESS [OK] to confirm", event)
+    local result = popupCompat(Protocol.fieldPopup.info or "", "PRESS [OK] to confirm", event)
     Protocol.fieldPopup.lastStatus = Protocol.fieldPopup.status
     if result == "OK" then
       Protocol.commandConfirm()
@@ -556,7 +556,7 @@ function UI.drawPopup(event)
       UI.commandRunningIndicator = (UI.commandRunningIndicator % 4) + 1
     end
     local result = popupCompat(
-      Protocol.fieldPopup.info .. " [" .. string.sub("|/-\\", UI.commandRunningIndicator, UI.commandRunningIndicator) .. "]",
+      (Protocol.fieldPopup.info or "") .. " [" .. string.sub("|/-\\", UI.commandRunningIndicator, UI.commandRunningIndicator) .. "]",
       "Press [RTN] to exit",
       event)
     Protocol.fieldPopup.lastStatus = Protocol.fieldPopup.status
