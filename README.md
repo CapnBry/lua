@@ -48,6 +48,8 @@ The shared library `SCRIPTS/ELRS/crsf.lua` is required by both widgets.
 
 The main tool (`SCRIPTS/TOOLS/ExpressLRS/`) lets you configure your ExpressLRS transmitter and receiver settings directly from your radio.
 
+<img src="screenshots/tool_main_bw.png" width="256" alt="ExpressLRS Configuration Tool"><br/>
+
 <img src="screenshots/tool_main.png" width="472" alt="ExpressLRS Configuration Tool">
 
 ### Architecture
