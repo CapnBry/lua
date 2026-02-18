@@ -30,6 +30,7 @@ Telemetry = {
   isDiversity = false,
 
   -- Cached GPS position (persists across disconnects)
+  ---@type {lat: number, lon: number}|nil
   gps = nil,
 
   -- Power level mapping table

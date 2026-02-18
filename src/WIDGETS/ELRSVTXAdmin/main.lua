@@ -13,9 +13,11 @@ local name = "ELRSVTXAdmin"
 local function create(zone, options)
   if not _crsfSingleton then
     local getCRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")
+    ---@diagnostic disable-next-line: need-check-nil
     _crsfSingleton = getCRSF()
   end
   local loadable = loadScript("/WIDGETS/" .. name .. "/loadable.lua")
+  ---@diagnostic disable-next-line: need-check-nil
   return loadable(zone, options, _crsfSingleton)
 end
 

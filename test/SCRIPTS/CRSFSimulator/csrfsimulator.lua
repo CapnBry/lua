@@ -171,6 +171,7 @@ local function queuePop()
   -- Serve deferred packets only after a nil has been returned (next poll cycle)
   if deferredReady and #deferredQueue > 0 then
     local pkt = tableRemove(deferredQueue, 1)
+    ---@diagnostic disable-next-line: need-check-nil
     return pkt.command, pkt.data
   end
 
@@ -599,6 +600,7 @@ local function updateFolderNames(device)
 
       local pwrVal = (vtxPwr and vtxPwr.value) or 0
       if pwrVal > 0 then
+        ---@diagnostic disable-next-line: need-check-nil
         local pwrLabel = getOptionLabel(vtxPwr.options, pwrVal)
         name = name .. ":" .. pwrLabel
 
@@ -606,6 +608,7 @@ local function updateFolderNames(device)
         if pitVal == 1 then
           name = name .. ":P"
         elseif pitVal > 1 then
+          ---@diagnostic disable-next-line: need-check-nil
           local pitLabel = getOptionLabel(vtxPit.options, pitVal)
           name = name .. ":" .. pitLabel
         end
@@ -946,6 +949,7 @@ local function mockPop()
   while i <= #delayedResponseQueue do
     if now >= delayedResponseQueue[i].deliverAt then
       local entry = tableRemove(delayedResponseQueue, i)
+      ---@diagnostic disable-next-line: need-check-nil
       queuePush(entry.command, entry.data)
     else
       i = i + 1

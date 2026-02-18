@@ -1,2 +1,3 @@
 *.luac
 color/WIDGETS/ELRSVTXAdmin/presets.txt
+bin/

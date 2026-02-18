@@ -1,0 +1,16 @@
+{
+  "runtime.version": "Lua 5.3",
+  "runtime.builtin": {
+    "os": "disable",
+    "debug": "disable",
+    "package": "disable",
+    "coroutine": "disable",
+    "utf8": "disable",
+    "io": "disable",
+    "bit32": "disable"
+  },
+  "workspace.library": ["types"],
+  "workspace.ignoreDir": ["bin", "types"],
+  "workspace.checkThirdParty": false,
+  "diagnostics.disable": ["lowercase-global"]
+}
