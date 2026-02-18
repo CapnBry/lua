@@ -20,7 +20,7 @@ end
 function TopBarUI.build(w, h)
   lvgl.build({
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 0,
       y = 0,
       w = w,
@@ -30,7 +30,7 @@ function TopBarUI.build(w, h)
       flexPad = 0,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           align = CENTER,
           font = SMLSIZE,
           color = function()
@@ -51,7 +51,7 @@ function TopBarUI.build(w, h)
           end,
         },
         {
-          type = "label",
+          type = lvgl.LABEL,
           align = CENTER,
           font = SMLSIZE,
           color = function()

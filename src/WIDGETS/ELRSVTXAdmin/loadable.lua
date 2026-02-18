@@ -622,7 +622,7 @@ local WidgetLayout = {}
 function WidgetLayout.column(w, h, opa, children)
   lvgl.build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       x = 0,
       y = 0,
       w = w,
@@ -632,7 +632,7 @@ function WidgetLayout.column(w, h, opa, children)
       filled = true,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 0,
       y = 0,
       w = w,
@@ -649,7 +649,7 @@ end
 function WidgetLayout.row(w, h, opa, children)
   lvgl.build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       x = 0,
       y = 0,
       w = w,
@@ -659,7 +659,7 @@ function WidgetLayout.row(w, h, opa, children)
       filled = true,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 0,
       y = 0,
       w = w,
@@ -744,7 +744,7 @@ function VTXDisplay.build6posLabels()
   for i = 1, 6 do
     local idx = i
     labels[#labels + 1] = {
-      type = "label", font = SMLSIZE,
+      type = lvgl.LABEL, font = SMLSIZE,
       color = function()
         return (Presets.lastPos == idx) and COLOR_THEME_PRIMARY1 or COLOR_THEME_DISABLED
       end,
@@ -763,7 +763,7 @@ function VTXDisplay.buildCheatsheet()
   local labels = VTXDisplay.build6posLabels()
   if #labels == 0 then return nil end
   return {
-    type = "box",
+    type = lvgl.BOX,
     flexFlow = lvgl.FLOW_ROW,
     borderPad = 0,
     flexPad = lvgl.PAD_TINY,
@@ -905,13 +905,13 @@ end
 local function createSectionHeader(container, title)
   container:build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_SMALL,
       thickness = 0,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = COLOR_THEME_PRIMARY1,
       text = title,

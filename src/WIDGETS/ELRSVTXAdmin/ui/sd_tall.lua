@@ -63,14 +63,14 @@ function WidgetUI.buildSixth(w, h, opa)
   local c1w = math.floor(w * 0.22)
   local columns = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = VTXDisplay.mainColor,
       text = VTXDisplay.statusText,
       visible = VTXDisplay.showStatus,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       w = c1w,
       font = WidgetUI.fonts.sixth.status,
       color = VTXDisplay.mainColor,
@@ -78,7 +78,7 @@ function WidgetUI.buildSixth(w, h, opa)
       visible = VTXDisplay.showChannel,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1,
       text = VTXDisplay.detailLine,
@@ -102,7 +102,7 @@ function WidgetUI.buildQuarter(w, h, opa)
   local c1w = math.floor(w * 0.22)
   local row1 = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       w = c1w,
       align = LEFT,
       font = WidgetUI.fonts.quarter.status,
@@ -110,7 +110,7 @@ function WidgetUI.buildQuarter(w, h, opa)
       text = VTXDisplay.bandChannel,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = WidgetUI.fonts.quarter.status,
       color = COLOR_THEME_SECONDARY1,
@@ -119,7 +119,7 @@ function WidgetUI.buildQuarter(w, h, opa)
   }
   if wide then
     row1[#row1 + 1] = {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = SMLSIZE,
       color = pitModeColor,
@@ -128,7 +128,7 @@ function WidgetUI.buildQuarter(w, h, opa)
   end
   local rows = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = BOLD,
       color = VTXDisplay.mainColor,
@@ -136,7 +136,7 @@ function WidgetUI.buildQuarter(w, h, opa)
       visible = VTXDisplay.showStatus,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = w,
       align = LEFT + VCENTER,
       flexFlow = lvgl.FLOW_ROW,
@@ -162,13 +162,13 @@ function WidgetUI.buildThird(w, h, opa)
   local rows = {}
   -- Title row — 480x320 has more vertical room than 480x272
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     font = BOLD,
     color = COLOR_THEME_SECONDARY1,
     text = "VTX Admin",
   }
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     align = LEFT,
     font = BOLD,
     color = VTXDisplay.mainColor,
@@ -176,7 +176,7 @@ function WidgetUI.buildThird(w, h, opa)
     visible = VTXDisplay.showStatus,
   }
   rows[#rows + 1] = {
-    type = "box",
+    type = lvgl.BOX,
     w = w,
     align = LEFT + VCENTER,
     flexFlow = lvgl.FLOW_ROW,
@@ -185,7 +185,7 @@ function WidgetUI.buildThird(w, h, opa)
     visible = VTXDisplay.showChannel,
     children = {
       {
-        type = "label",
+        type = lvgl.LABEL,
         w = c1w,
         align = LEFT,
         font = WidgetUI.fonts.third.status,
@@ -193,7 +193,7 @@ function WidgetUI.buildThird(w, h, opa)
         text = VTXDisplay.bandChannel,
       },
       {
-        type = "label",
+        type = lvgl.LABEL,
         align = LEFT,
         font = SMLSIZE,
         color = COLOR_THEME_SECONDARY1,
@@ -213,13 +213,13 @@ end
 function WidgetUI.buildHalf(w, h, opa)
   local rows = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = COLOR_THEME_SECONDARY1,
       text = "VTX Admin",
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = BOLD,
       color = VTXDisplay.mainColor,
@@ -227,7 +227,7 @@ function WidgetUI.buildHalf(w, h, opa)
       visible = VTXDisplay.showStatus,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = WidgetUI.fonts.half.hero,
       color = VTXDisplay.mainColor,
@@ -235,7 +235,7 @@ function WidgetUI.buildHalf(w, h, opa)
       visible = VTXDisplay.showChannel,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1,
@@ -254,13 +254,13 @@ end
 function WidgetUI.buildFull(w, h, opa)
   local rows = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = COLOR_THEME_SECONDARY1,
       text = "VTX Admin",
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = BOLD,
       color = VTXDisplay.mainColor,
@@ -268,7 +268,7 @@ function WidgetUI.buildFull(w, h, opa)
       visible = VTXDisplay.showStatus,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = WidgetUI.fonts.full.hero,
       color = VTXDisplay.mainColor,
@@ -276,7 +276,7 @@ function WidgetUI.buildFull(w, h, opa)
       visible = VTXDisplay.showChannel,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = WidgetUI.fonts.full.detail,
       color = COLOR_THEME_SECONDARY1,

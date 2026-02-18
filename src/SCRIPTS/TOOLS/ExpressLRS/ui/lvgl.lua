@@ -65,25 +65,25 @@ function ModelMismatchDialog.show(onContinue, onExit)
 
   dg:build({
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 10,
       flexFlow = lvgl.FLOW_COLUMN,
       flexPad = lvgl.PAD_SMALL,
       children = {
-        { type = "label", text = "Receiver connected but Model ID doesn't match." },
-        { type = "label", text = "This prevents controlling the wrong model." },
-        { type = "label", text = "To use this receiver:" },
-        { type = "label", text = "Set Model Match to OFF" },
+        { type = lvgl.LABEL, text = "Receiver connected but Model ID doesn't match." },
+        { type = lvgl.LABEL, text = "This prevents controlling the wrong model." },
+        { type = lvgl.LABEL, text = "To use this receiver:" },
+        { type = lvgl.LABEL, text = "Set Model Match to OFF" },
       },
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = lvgl.PERCENT_SIZE + 100,
       flexFlow = lvgl.FLOW_ROW,
       flexPad = lvgl.PAD_SMALL,
       children = {
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 48,
           text = "Continue",
           press = function()
@@ -92,7 +92,7 @@ function ModelMismatchDialog.show(onContinue, onExit)
           end,
         },
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 48,
           text = "Exit to Change Model",
           press = function()
@@ -125,27 +125,27 @@ function NoModuleDialog.show(onExit)
 
   dg:build({
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 10,
       flexFlow = lvgl.FLOW_COLUMN,
       flexPad = lvgl.PAD_SMALL,
       children = {
-        { type = "label", text = "- Internal/External module enabled" },
-        { type = "label", text = "- Protocol set to CRSF" },
-        { type = "label", text = "- Minimum Baud rate (depends on packet rate):" },
-        { type = "label", font = SMLSIZE, text = "  400k for 250Hz" },
-        { type = "label", font = SMLSIZE, text = "  921k for 500Hz" },
-        { type = "label", font = SMLSIZE, text = "  1.87M for F1000" },
+        { type = lvgl.LABEL, text = "- Internal/External module enabled" },
+        { type = lvgl.LABEL, text = "- Protocol set to CRSF" },
+        { type = lvgl.LABEL, text = "- Minimum Baud rate (depends on packet rate):" },
+        { type = lvgl.LABEL, font = SMLSIZE, text = "  400k for 250Hz" },
+        { type = lvgl.LABEL, font = SMLSIZE, text = "  921k for 500Hz" },
+        { type = lvgl.LABEL, font = SMLSIZE, text = "  1.87M for F1000" },
       },
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       flexFlow = lvgl.FLOW_ROW,
       children = {
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 98,
           text = "Exit",
           press = function()
@@ -209,33 +209,33 @@ function CommandPage.showConfirm(name, info, onConfirm, onCancel)
 
   container:build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_LARGE,
       thickness = 0,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       font = BOLD,
       text = name or "Command",
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       color = COLOR_THEME_DISABLED,
       text = info or "",
     },
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_LARGE,
       thickness = 0,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       flexFlow = lvgl.FLOW_ROW,
@@ -243,13 +243,13 @@ function CommandPage.showConfirm(name, info, onConfirm, onCancel)
       borderPad = lvgl.PAD_OUTLINE,
       children = {
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 49,
           text = "Confirm",
           press = onConfirm,
         },
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 49,
           text = "Cancel",
           press = onCancel,
@@ -279,7 +279,7 @@ function CommandPage.showExecuting(title, onCancel)
 
   container:build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_LARGE,
       thickness = 0,
@@ -288,26 +288,26 @@ function CommandPage.showExecuting(title, onCancel)
   createSpinner(container)
   container:build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_LARGE,
       thickness = 0,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       color = COLOR_THEME_DISABLED,
       text = "Hold [RTN] to exit and keep running",
     },
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_LARGE,
       thickness = 0,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       flexFlow = lvgl.FLOW_ROW,
@@ -315,7 +315,7 @@ function CommandPage.showExecuting(title, onCancel)
       borderPad = lvgl.PAD_OUTLINE,
       children = {
         {
-          type = "button",
+          type = lvgl.BUTTON,
           w = lvgl.PERCENT_SIZE + 100,
           text = "Cancel command",
           press = onCancel,
@@ -708,141 +708,126 @@ end
 -- ============================================================================
 
 local IS_NARROW = LCD_W < 400
-local LABEL_PCT = IS_NARROW and 42 or 50
-local CTRL_PCT  = 100 - LABEL_PCT
+local LABEL_PCT = lvgl.PERCENT_SIZE + (IS_NARROW and 42 or 50)
 
-function UI.createChoiceRow(pg, field)
-  local row = pg:rectangle({
+function UI.createToggleRow(pg, field)
+  pg:setting({
     w = lvgl.PERCENT_SIZE + 100,
-    thickness = 0,
-    flexFlow = lvgl.FLOW_ROW,
-    flexPad = 0
-  })
-
-  row:rectangle({
-    w = lvgl.PERCENT_SIZE + LABEL_PCT,
-    h = lvgl.UI_ELEMENT_HEIGHT,
-    thickness = 0,
+    title = field.name,
     children = {
-        {
-            type = lvgl.LABEL,
-            y = lvgl.PAD_SMALL,
-            text = field.name or "",
-            color = COLOR_THEME_PRIMARY1
-        }
-    }
-  })
-
-  local ctrlRect = row:rectangle({
-    w = lvgl.PERCENT_SIZE + CTRL_PCT,
-    thickness = 0,
-    flexFlow = lvgl.FLOW_ROW,
-    align = LEFT + VCENTER
-  })
-
-  if UI.isBooleanField(field) then
-    ctrlRect:toggle({
-      get = function() return field.value or 0 end,
-      set = function(val)
-        field.value = val
-        Protocol.fieldIntSave(field)
-        Protocol.reloadRelatedFields(field)
-      end,
-      active = function() return not field.disabled end
-    })
-  else
-    local filteredValues = {}
-    local origToFiltered = {}
-    local filteredToOrig = {}
-    for i, v in ipairs(field.values or {}) do
-      if v ~= "" then
-        filteredValues[#filteredValues + 1] = v
-        origToFiltered[i - 1] = #filteredValues
-        filteredToOrig[#filteredValues] = i - 1
-      end
-    end
-    ctrlRect:choice({
-      values = filteredValues,
-      get = function() return origToFiltered[field.value or 0] or 1 end,
-      set = function(val)
-        field.value = filteredToOrig[val] or 0
-        Protocol.fieldIntSave(field)
-        Protocol.reloadRelatedFields(field)
-      end,
-      active = function() return not field.disabled end
-    })
-  end
-
-  if field.unit and field.unit ~= "" then
-    ctrlRect:box({
-      h = lvgl.UI_ELEMENT_HEIGHT,
-      children = {
+      {
+        type = lvgl.BOX,
+        x = LABEL_PCT,
+        flexFlow = lvgl.FLOW_ROW,
+        flexPad = lvgl.PAD_MEDIUM,
+        align = LEFT,
+        children = {
           {
-              type = lvgl.LABEL,
-              y = lvgl.PAD_SMALL,
-              text = table.concat({" ", field.unit}),
-          }
-      }
-    })
-  end
-end
-
-function UI.createNumberRow(pg, field)
-  local displayFn
-  if field.type == Protocol.CRSF.FLOAT then
-    displayFn = function(val)
-      return string.format(field.fmt or "%.0f", val / (field.prec or 1))
-    end
-  else
-    displayFn = function(val)
-      return table.concat({tostring(val), field.unit or ""})
-    end
-  end
-
-  pg:build({
-    {
-      type = "rectangle",
-      w = lvgl.PERCENT_SIZE + 100,
-      flexFlow = lvgl.FLOW_ROW,
-      flexPad = 0,
-      thickness = 0,
-      children = {
-        {
-          type = "rectangle",
-          w = lvgl.PERCENT_SIZE + LABEL_PCT,
-          thickness = 0,
-          children = {
-            {
-              type = "label",
-              color = COLOR_THEME_PRIMARY1,
-              text = field.name or "",
+            type = lvgl.TOGGLE,
+            get = function() return field.value or 0 end,
+            set = function(val)
+              field.value = val
+              Protocol.fieldIntSave(field)
+              Protocol.reloadRelatedFields(field)
+            end,
+            active = function() return not field.disabled end,
+          },
+          {
+            type = lvgl.BOX,
+            h = lvgl.UI_ELEMENT_HEIGHT,
+            children = {
+              {
+                type = lvgl.LABEL,
+                y = lvgl.PAD_MEDIUM,
+                text = field.unit,
+              },
             },
           },
         },
-        {
-          type = "rectangle",
-          w = lvgl.PERCENT_SIZE + CTRL_PCT,
-          align = LEFT,
-          flexFlow = lvgl.FLOW_ROW,
-          thickness = 0,
-          children = {
-            {
-              type = "numberEdit",
-              min = field.min or 0,
-              max = field.max or 255,
-              get = function() return field.value or 0 end,
-              set = function(val)
-                field.value = val
-              end,
-              edited = function(val)
-                field.value = val
-                Protocol.fieldIntSave(field)
-                Protocol.reloadParentFolder(field)
-              end,
-              display = displayFn,
-              active = function() return not field.disabled end,
+      },
+    },
+  })
+end
+
+function UI.createChoiceRow(pg, field)
+  local filteredValues = {}
+  local origToFiltered = {}
+  local filteredToOrig = {}
+  for i, v in ipairs(field.values or {}) do
+    if v ~= "" then
+      filteredValues[#filteredValues + 1] = v
+      origToFiltered[i - 1] = #filteredValues
+      filteredToOrig[#filteredValues] = i - 1
+    end
+  end
+
+  pg:setting({
+    w = lvgl.PERCENT_SIZE + 100,
+    title = field.name,
+    children = {
+      {
+        type = lvgl.BOX,
+        x = LABEL_PCT,
+        flexFlow = lvgl.FLOW_ROW,
+        flexPad = lvgl.PAD_MEDIUM,
+        align = LEFT,
+        children = {
+          {
+            type = lvgl.CHOICE,
+            values = filteredValues,
+            get = function() return origToFiltered[field.value or 0] or 1 end,
+            set = function(val)
+              field.value = filteredToOrig[val] or 0
+              Protocol.fieldIntSave(field)
+              Protocol.reloadRelatedFields(field)
+            end,
+            active = function() return not field.disabled end,
+          },
+          {
+            type = lvgl.BOX,
+            h = lvgl.UI_ELEMENT_HEIGHT,
+            children = {
+              {
+                type = lvgl.LABEL,
+                y = lvgl.PAD_MEDIUM,
+                text = field.unit,
+              },
             },
           },
+        },
+      },
+    },
+  })
+end
+
+function UI.createNumberRow(pg, field)
+  pg:build({
+    {
+      type = lvgl.SETTING,
+      w = lvgl.PERCENT_SIZE + 100,
+      title = field.name,
+      children = {
+        {
+          type = lvgl.NUMBER_EDIT,
+          x = LABEL_PCT,
+          min = field.min or 0,
+          max = field.max or 255,
+          get = function() return field.value or 0 end,
+          set = function(val)
+            field.value = val
+          end,
+          edited = function(val)
+            field.value = val
+            Protocol.fieldIntSave(field)
+            Protocol.reloadParentFolder(field)
+          end,
+          display = function(val)
+            if field.type == Protocol.CRSF.FLOAT then
+              return string.format(field.fmt or "%.0f", val / (field.prec or 1))
+            end
+            return table.concat({tostring(val), field.unit or ""})
+          end,
+          active = function() return not field.disabled end,
         },
       },
     },
@@ -852,33 +837,14 @@ end
 function UI.createInfoRow(pg, field)
   pg:build({
     {
-      type = "rectangle",
+      type = lvgl.SETTING,
       w = lvgl.PERCENT_SIZE + 100,
-      flexFlow = lvgl.FLOW_ROW,
-      flexPad = 0,
-      thickness = 0,
+      title = field.name,
       children = {
         {
-          type = "rectangle",
-          w = lvgl.PERCENT_SIZE + LABEL_PCT,
-          thickness = 0,
-          children = {
-            {
-              type = "label",
-              color = COLOR_THEME_PRIMARY1,
-              text = field.name or "",
-            },
-          },
-        },
-        {
-          type = "rectangle",
-          w = lvgl.PERCENT_SIZE + CTRL_PCT,
-          align = LEFT,
-          flexFlow = lvgl.FLOW_ROW,
-          thickness = 0,
-          children = {
-            { type = "label", text = field.value or "" },
-          },
+          type = lvgl.LABEL,
+          x = LABEL_PCT,
+          text = field.value,
         },
       },
     },
@@ -926,7 +892,11 @@ function UI.buildFieldWidget(pg, field, folderWidth)
   end
 
   if fieldType == Protocol.CRSF.TEXT_SELECTION then
-    return UI.createChoiceRow(pg, field)
+    if UI.isBooleanField(field) then
+      return UI.createToggleRow(pg, field)
+    else
+      return UI.createChoiceRow(pg, field)
+    end
   end
 
   if fieldType == Protocol.CRSF.STRING or fieldType == Protocol.CRSF.INFO then
@@ -957,18 +927,10 @@ function UI.build()
 
   UI.currentPage = lvgl.page(pageOptions)
 
-  local outerContainer = UI.currentPage:box({
-    w = lvgl.PERCENT_SIZE + 100,
-    flexFlow = lvgl.FLOW_ROW,
-    flexPad = lvgl.PAD_TINY,
-    align = CENTER
-  })
-
-  local fieldContainer = outerContainer:box({
+  local fieldContainer = UI.currentPage:box({
     w = lvgl.PERCENT_SIZE + 100,
     flexFlow = lvgl.FLOW_COLUMN,
-    flexPad = lvgl.PAD_SMALL,
-    borderPad = lvgl.PAD_OUTLINE,
+    flexPad = lvgl.PAD_OUTLINE,
   })
 
   local currentFolder = Navigation.getCurrent()

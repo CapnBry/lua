@@ -194,7 +194,7 @@ local WidgetLayout = {}
 function WidgetLayout.column(w, h, opa, children)
   lvgl.build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       x = 0,
       y = 0,
       w = w,
@@ -204,7 +204,7 @@ function WidgetLayout.column(w, h, opa, children)
       filled = true,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 0,
       y = 0,
       w = w,
@@ -221,7 +221,7 @@ end
 function WidgetLayout.row(w, h, opa, children)
   lvgl.build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       x = 0,
       y = 0,
       w = w,
@@ -231,7 +231,7 @@ function WidgetLayout.row(w, h, opa, children)
       filled = true,
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       x = 0,
       y = 0,
       w = w,
@@ -305,13 +305,13 @@ end
 local function createSectionHeader(container, title)
   container:build({
     {
-      type = "rectangle",
+      type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
       h = lvgl.PAD_SMALL,
       thickness = 0,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = COLOR_THEME_PRIMARY1,
       text = title,
@@ -369,7 +369,7 @@ local function buildFullScreen()
   -- Model mismatch warning banner
   fields:build({
     {
-      type = "label",
+      type = lvgl.LABEL,
       font = BOLD,
       color = RED,
       text = "Model Mismatch — RC commands not sent",

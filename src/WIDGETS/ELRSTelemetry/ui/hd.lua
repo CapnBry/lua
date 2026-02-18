@@ -69,12 +69,12 @@ function WidgetUI.buildSixth(w, h, opa)
   local c3w = w - c1w - c2w
   local columns = {
     {
-      type = "box",
+      type = lvgl.BOX,
       w = c1w,
       h = lvgl.UI_ELEMENT_HEIGHT,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           y = lvgl.PAD_SMALL,
           font = BOLD,
           color = heroColorMismatch,
@@ -83,12 +83,12 @@ function WidgetUI.buildSixth(w, h, opa)
       },
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = c2w,
       h = lvgl.UI_ELEMENT_HEIGHT,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           y = lvgl.PAD_SMALL,
           font = SMLSIZE,
           color = detailColor,
@@ -97,12 +97,12 @@ function WidgetUI.buildSixth(w, h, opa)
       },
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = c3w,
       h = lvgl.UI_ELEMENT_HEIGHT,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           y = lvgl.PAD_SMALL,
           font = SMLSIZE,
           color = COLOR_THEME_SECONDARY1,
@@ -120,7 +120,7 @@ function WidgetUI.buildQuarter(w, h, opa)
   local c1w = math.floor(w * 0.30)
   local rows = {
     {
-      type = "box",
+      type = lvgl.BOX,
       w = w,
       align = LEFT + VCENTER,
       flexFlow = lvgl.FLOW_ROW,
@@ -128,7 +128,7 @@ function WidgetUI.buildQuarter(w, h, opa)
       flexPad = lvgl.PAD_TINY,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           w = c1w,
           align = LEFT,
           font = BOLD,
@@ -136,7 +136,7 @@ function WidgetUI.buildQuarter(w, h, opa)
           text = heroTextLq,
         },
         {
-          type = "label",
+          type = lvgl.LABEL,
           align = LEFT,
           font = SMLSIZE,
           color = detailColor,
@@ -145,7 +145,7 @@ function WidgetUI.buildQuarter(w, h, opa)
       },
     },
     {
-      type = "box",
+      type = lvgl.BOX,
       w = w,
       align = LEFT,
       flexFlow = lvgl.FLOW_ROW,
@@ -153,7 +153,7 @@ function WidgetUI.buildQuarter(w, h, opa)
       flexPad = lvgl.PAD_TINY,
       children = {
         {
-          type = "label",
+          type = lvgl.LABEL,
           align = LEFT,
           font = SMLSIZE,
           color = COLOR_THEME_SECONDARY1,
@@ -171,14 +171,14 @@ function WidgetUI.buildThird(w, h, opa)
   local rows = {}
   -- Title row
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     align = LEFT,
     font = BOLD,
     color = COLOR_THEME_SECONDARY1,
     text = "ExpressLRS",
   }
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     align = LEFT,
     font = function()
       if Telemetry.statusText() then
@@ -190,14 +190,14 @@ function WidgetUI.buildThird(w, h, opa)
     text = heroTextLq,
   }
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     align = LEFT,
     font = WidgetUI.fonts.third.detail,
     color = detailColor,
     text = Telemetry.signalText,
   }
   rows[#rows + 1] = {
-    type = "label",
+    type = lvgl.LABEL,
     align = LEFT,
     font = SMLSIZE,
     color = COLOR_THEME_SECONDARY1,
@@ -211,14 +211,14 @@ end
 function WidgetUI.buildFull(w, h, opa)
   local rows = {
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = BOLD,
       color = COLOR_THEME_SECONDARY1,
       text = "ExpressLRS",
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = function()
         if Telemetry.statusText() then
@@ -230,21 +230,21 @@ function WidgetUI.buildFull(w, h, opa)
       text = heroTextLq,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = WidgetUI.fonts.full.detail,
       color = detailColor,
       text = Telemetry.signalText,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = SMLSIZE,
       color = COLOR_THEME_SECONDARY1,
       text = Telemetry.rfDetailText,
     },
     {
-      type = "label",
+      type = lvgl.LABEL,
       align = LEFT,
       font = SMLSIZE,
       color = COLOR_THEME_PRIMARY3,
