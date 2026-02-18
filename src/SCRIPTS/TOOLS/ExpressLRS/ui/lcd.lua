@@ -298,7 +298,7 @@ function UI.incrField(step)
       field.value = newval
       return
     end
-  until (newval == min or newval == max)
+  until newval == min or newval == max
 end
 
 -- ============================================================================

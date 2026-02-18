@@ -140,7 +140,9 @@ local function setMock()
   local mock = mockModule()
   CRSF.pop = mock.pop
   CRSF.push = mock.push
-  CRSF.hasCrsfModule = function() return mock.moduleFound end
+  CRSF.hasCrsfModule = function()
+    return mock.moduleFound
+  end
   CRSF.getSensorValue = mock.getSensorValue
 end
 

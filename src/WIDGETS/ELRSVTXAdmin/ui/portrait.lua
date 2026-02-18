@@ -6,8 +6,6 @@
 local ctx = ...
 local VTX = ctx.VTX
 local Protocol = ctx.Protocol
-local Presets = ctx.Presets
-local crsf = ctx.crsf
 local bgOpacity = ctx.bgOpacity
 local VTXDisplay = ctx.VTXDisplay
 local WidgetLayout = ctx.WidgetLayout
@@ -67,9 +65,15 @@ local function buildCheatsheetNarrow()
     return nil, nil
   end
   local row1, row2 = {}, {}
-  for i = 1, 3 do row1[#row1 + 1] = labels[i] end
-  for i = 4, 6 do row2[#row2 + 1] = labels[i] end
-  local vis = function() return Protocol.state ~= Protocol.STATE_NO_MODULE end
+  for i = 1, 3 do
+    row1[#row1 + 1] = labels[i]
+  end
+  for i = 4, 6 do
+    row2[#row2 + 1] = labels[i]
+  end
+  local hasModule = function()
+    return Protocol.state ~= Protocol.STATE_NO_MODULE
+  end
   return
     {
       type = lvgl.BOX,
@@ -77,7 +81,7 @@ local function buildCheatsheetNarrow()
       flexFlow = lvgl.FLOW_ROW,
       flexPad = lvgl.PAD_TINY,
       borderPad = 0,
-      visible = vis,
+      visible = hasModule,
       children = row1,
     },
     {
@@ -86,7 +90,7 @@ local function buildCheatsheetNarrow()
       flexFlow = lvgl.FLOW_ROW,
       flexPad = lvgl.PAD_TINY,
       borderPad = 0,
-      visible = vis,
+      visible = hasModule,
       children = row2,
     }
 end

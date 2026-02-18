@@ -456,7 +456,9 @@ end
 
 function UI.handleNoModule()
   if not UI.uiBuilt then
-    NoModuleDialog.show(function() App.shouldExit = true end)
+    NoModuleDialog.show(function()
+      App.shouldExit = true
+    end)
     UI.uiBuilt = true
   end
 end
@@ -693,7 +695,7 @@ function UI.incrField(field, step)
       field.value = newval
       return
     end
-  until (newval == min or newval == max)
+  until newval == min or newval == max
 end
 
 function UI.isBooleanField(field)

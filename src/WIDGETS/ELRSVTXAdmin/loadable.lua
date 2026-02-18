@@ -59,7 +59,11 @@ function VTX.parseFolderName(name)
   local s = VTX.state
   local content = string.match(name, "%((.+)%)")
   if not content then
-    s.band = 0; s.bandLetter = "Off"; s.channel = 0; s.power = 0; s.pitmode = false
+    s.band = 0
+    s.bandLetter = "Off"
+    s.channel = 0
+    s.power = 0
+    s.pitmode = false
     return true
   end
 
@@ -125,9 +129,17 @@ Protocol = {
 }
 
 -- State query helpers
-function Protocol.isReady()   return Protocol.state == Protocol.STATE_READY   end
-function Protocol.isSending() return Protocol.state == Protocol.STATE_SENDING end
-function Protocol.isActive()  return Protocol.state == Protocol.STATE_READY or Protocol.state == Protocol.STATE_SENDING end
+function Protocol.isReady()
+  return Protocol.state == Protocol.STATE_READY
+end
+
+function Protocol.isSending()
+  return Protocol.state == Protocol.STATE_SENDING
+end
+
+function Protocol.isActive()
+  return Protocol.state == Protocol.STATE_READY or Protocol.state == Protocol.STATE_SENDING
+end
 
 -- Response timeout for PARAMETER_READ: 0.5s for local TX module.
 function Protocol.fieldResponseTimeout()
@@ -968,22 +980,36 @@ local function buildFullScreen()
   createChoiceRow(fields, "Band",
     { "Off", "A", "B", "E", "F", "R", "L" },
     function() return d.band + 1 end,
-    function(idx) d.band = idx - 1; Protocol.writeConfig() end)
+    function(idx)
+      d.band = idx - 1
+      Protocol.writeConfig()
+    end)
 
   createNumberRow(fields, "Channel", 1, 8,
     function() return d.channel end,
     function(v) d.channel = v end,
-    function(v) d.channel = v; Protocol.writeConfig() end)
+    function(v)
+      d.channel = v
+      Protocol.writeConfig()
+    end)
 
   createNumberRow(fields, "Power Level", 0, 8,
     function() return d.power end,
     function(v) d.power = v end,
-    function(v) d.power = v; Protocol.writeConfig() end,
-    function(v) return v == 0 and "-" or tostring(v) end)
+    function(v)
+      d.power = v
+      Protocol.writeConfig()
+    end,
+    function(v)
+      return v == 0 and "-" or tostring(v)
+    end)
 
   createToggleRow(fields, "Pit Mode",
     function() return d.pitmode end,
-    function(v) d.pitmode = v; Protocol.writeConfig() end)
+    function(v)
+      d.pitmode = v
+      Protocol.writeConfig()
+    end)
 
   fields:button({
     text = function()
@@ -993,7 +1019,10 @@ local function buildFullScreen()
       return "Send VTx"
     end,
     w = lvgl.PERCENT_SIZE + 100,
-    press = function() Protocol.writeConfig(); Protocol.pushToVtx() end,
+    press = function()
+      Protocol.writeConfig()
+      Protocol.pushToVtx()
+    end,
     active = function() return Protocol.isReady() end,
   })
 

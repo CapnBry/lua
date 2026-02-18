@@ -239,7 +239,7 @@ end
 -- @param chunk   chunk index (0 for single-chunk params)
 -- @param destAddr  destination address
 -- @return data table suitable for queuePush(FRAMETYPE_PARAMETER_SETTINGS_ENTRY, data)
-local function encodeParameterEntry(device, param, chunk, destAddr)
+local function encodeParameterEntry(device, param, _chunk, destAddr)
   local data = {}
   data[1] = destAddr or CRSF.ADDRESS_RADIO_TRANSMITTER
   data[2] = device.id
@@ -299,12 +299,8 @@ local function encodeParameterEntry(device, param, chunk, destAddr)
     end
     data[#data + 1] = 0xFF  -- terminator
 
-  elseif t == CRSF.INFO then
-    -- Info value string (null-terminated)
-    appendString(data, param.value or "")
-
-  elseif t == CRSF.STRING then
-    -- String value (null-terminated)
+  elseif t == CRSF.INFO or t == CRSF.STRING then
+    -- INFO (read-only) and STRING (editable) both encode as null-terminated string
     appendString(data, param.value or "")
 
   elseif t == CRSF.UINT8 then
