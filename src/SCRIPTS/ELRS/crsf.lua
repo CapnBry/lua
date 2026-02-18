@@ -281,6 +281,7 @@ local function onDeviceInfo(data)
 
   -- RFMOD / RFRSSI lookup tables (version-dependent)
   if info.vMaj == 4 then
+    -- selene: allow(mixed_table)
     info.RFMOD = {
       "25Hz", "50Hz", "100Hz", "100HzFull", "150Hz", "200Hz", "200HzFull",
       "250Hz", "333HzFull", "500Hz", "D50", "K1000Full",
@@ -291,6 +292,7 @@ local function onDeviceInfo(data)
       [35]="DK250", [36]="DK500", [37]="K1000",
       [101]="X100Full", [102]="X150",
     }
+    -- selene: allow(mixed_table)
     info.RFRSSI = {
       -123, -120, -117, -112, 0, -112, -111, -111, 0, 0, -112, -101,
       [21]=0, [22]=-115, [23]=0, [24]=-112, [25]=-112, [26]=0, [27]=0,

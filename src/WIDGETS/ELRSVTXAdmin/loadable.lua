@@ -22,6 +22,7 @@ local Presets
 
 VTX = {
   -- Band name lookup tables
+  -- selene: allow(mixed_table)
   BAND_NAMES  = { [0] = "Off", "A", "B", "E", "F", "R", "L" },
   BAND_VALUES = { Off = 0, A = 1, B = 2, E = 3, F = 4, R = 5, L = 6 },
 
@@ -1108,7 +1109,7 @@ function wgt.background()
   Presets.processPushSource()
 end
 
-function wgt.refresh(event, touchState)
+function wgt.refresh(_event, _touchState)
   wgt.background()
 end
 

@@ -572,7 +572,7 @@ function wgt.background()
   Telemetry.updateGps()
 end
 
-function wgt.refresh(event, touchState)
+function wgt.refresh(_event, _touchState)
   wgt.background()
 
   -- Update diversity detection each tick

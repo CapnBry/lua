@@ -334,7 +334,7 @@ end
 local versionCheckResult = nil
 
 local function checkEdgeTxVersion()
-  local ver, radio, maj, minor, rev = getVersion()
+  local ver, _radio, maj, minor, rev = getVersion()
 
   if maj >= 3 then
     return true
@@ -608,7 +608,7 @@ end
 -- Interface: render
 -- ============================================================================
 
-function UI.render(event, touchState)
+function UI.render(_event, _touchState)
   handleCommandPopup()
 
   if not UI.commandDialog then

@@ -119,7 +119,7 @@ end
 -- Interface: render
 -- ============================================================================
 
-function UI.render(event, touchState)
+function UI.render(event, _touchState)
   -- Warning flashing timer
   local time = getTime()
   if time > UI.titleShowWarnTimeout then

@@ -9,6 +9,7 @@
 
 local name = "ELRSTelemetry"
 
+-- selene: allow(undefined_variable)
 local function create(zone, options)
   if not _crsfSingleton then
     local getCRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")
