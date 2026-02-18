@@ -10,9 +10,6 @@ local Navigation = deps.Navigation
 local Protocol = deps.Protocol
 local VERSION = deps.VERSION
 
--- Popup compatibility wrapper (set in UI.init)
-local popupCompat
-
 -- ============================================================================
 -- UI state
 -- ============================================================================
@@ -63,16 +60,6 @@ function UI.init()
   UI.COL1 = 0
   UI.textYoffset = 3
   UI.textSize = 8
-
-  -- Determine popupConfirmation argument count
-  local _, _, major = getVersion()
-  if major ~= 1 then
-    popupCompat = popupConfirmation
-  else
-    popupCompat = function(t, m, e)
-      return popupConfirmation(t, e)
-    end
-  end
 end
 
 -- ============================================================================
@@ -540,11 +527,11 @@ function UI.drawPopup(event)
   end
 
   if Protocol.fieldPopup.status == Protocol.CRSF.CMD_IDLE and Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_IDLE then
-    popupCompat(Protocol.fieldPopup.info or "", "Stopped!", event)
+    popupConfirmation(Protocol.fieldPopup.info or "", "Stopped!", event)
     Protocol.reloadAllFields()
     Protocol.fieldPopup = nil
   elseif Protocol.fieldPopup.status == Protocol.CRSF.CMD_ASKCONFIRM then
-    local result = popupCompat(Protocol.fieldPopup.info or "", "PRESS [OK] to confirm", event)
+    local result = popupConfirmation(Protocol.fieldPopup.info or "", "PRESS [OK] to confirm", event)
     Protocol.fieldPopup.lastStatus = Protocol.fieldPopup.status
     if result == "OK" then
       Protocol.commandConfirm()
@@ -555,7 +542,7 @@ function UI.drawPopup(event)
     if Protocol.fieldChunk == 0 then
       UI.commandRunningIndicator = (UI.commandRunningIndicator % 4) + 1
     end
-    local result = popupCompat(
+    local result = popupConfirmation(
       (Protocol.fieldPopup.info or "") .. " [" .. string.sub("|/-\\", UI.commandRunningIndicator, UI.commandRunningIndicator) .. "]",
       "Press [RTN] to exit",
       event)
