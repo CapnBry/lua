@@ -948,7 +948,7 @@ local function getElrsFlagsInfo()
   if config.scenario == "model_mismatch" then
     return "Model Mismatch"
   elseif config.scenario == "armed" then
-    return "is Armed!"
+    return "[ ! Armed ! ]"
   end
   return ""
 end
