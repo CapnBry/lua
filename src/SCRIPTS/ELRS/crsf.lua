@@ -392,9 +392,6 @@ local function onDeviceInfo(data)
       0,
       -101,
     }
-  else
-    info.RFMOD = { "", "25Hz", "50Hz", "100Hz", "150Hz", "200Hz", "250Hz", "500Hz" }
-    info.RFRSSI = { 0, -123, -115, -117, -112, -112, -108, -105 }
   end
 end
 

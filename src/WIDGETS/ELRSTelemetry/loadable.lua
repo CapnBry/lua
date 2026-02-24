@@ -110,7 +110,7 @@ function Telemetry.getRangePct(tlm)
   if rssi == nil then
     return 0
   end
-  local minrssi = (mod.RFRSSI and mod.RFRSSI[(tlm.rfmd or 0) + 1]) or -128
+  local minrssi = (mod.RFRSSI and tlm.rfmd and mod.RFRSSI[tlm.rfmd + 1]) or -128
   if rssi > -50 then
     rssi = -50
   end
@@ -127,8 +127,11 @@ end
 
 --- Get RF mode string from device info.
 function Telemetry.getRfModeStr(rfmd)
+  if not crsf.rxConnected or rfmd == nil then
+    return ""
+  end
   local mod = crsf.deviceInfo
-  return (mod.RFMOD and mod.RFMOD[(rfmd or 0) + 1]) or table.concat({ "RFMD", tostring(rfmd or 0) })
+  return (mod.RFMOD and mod.RFMOD[rfmd + 1]) or table.concat({ "RFMD", tostring(rfmd) })
 end
 
 --- Update GPS cache from telemetry.
