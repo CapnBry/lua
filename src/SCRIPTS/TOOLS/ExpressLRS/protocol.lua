@@ -162,6 +162,14 @@ function Protocol.isConnected()
   return bit32.btest(Protocol.elrsFlags, 1)
 end
 
+function Protocol.isModelMismatch()
+  return bit32.btest(Protocol.elrsFlags, 0x04)
+end
+
+function Protocol.hasCriticalError()
+  return Protocol.elrsFlags > Protocol.CRSF.ELRS_FLAGS_WARNING_THRESHOLD
+end
+
 -- Response timeout for PARAMETER_READ:
 -- 0.5s for local TX module, 5s for remote devices relayed over air link.
 function Protocol.fieldResponseTimeout()

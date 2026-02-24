@@ -584,7 +584,7 @@ local function handleWarning()
   end
   if Protocol.elrsFlags > Protocol.CRSF.ELRS_FLAGS_STATUS_MASK then
     if not UI.warningDialog and not UI.warningDismissed then
-      if Protocol.elrsFlagsInfo == "Model Mismatch" then
+      if Protocol.isModelMismatch() then
         UI.warningDialog = ModelMismatchDialog.show(function()
           UI.warningDismissed = true
           UI.warningDismissedAt = getTime()
@@ -593,7 +593,7 @@ local function handleWarning()
           UI.warningDismissed = true
           App.shouldExit = true
         end)
-      else
+      elseif Protocol.hasCriticalError() then
         Dialogs.showMessage({
           title = "Warning",
           message = Protocol.elrsFlagsInfo,
