@@ -234,7 +234,7 @@ function WidgetUI.buildFull(w, h, opa)
       type = lvgl.LABEL,
       align = LEFT,
       font = SMLSIZE,
-      color = COLOR_THEME_PRIMARY3,
+      color = COLOR_THEME_SECONDARY1,
       text = function()
         local vbat = crsf.getSensorValue("RxBt")
         if vbat == nil or vbat <= 0 then
