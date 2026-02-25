@@ -38,6 +38,10 @@ local UI = {
   titleShowWarn = nil,
   titleShowWarnTimeout = 100,
 
+  -- Warning dismissal (model mismatch)
+  warningDismissed = false,
+  warningDismissedAt = nil,
+
   -- Command popup spinner
   commandRunningIndicator = 1,
 }
@@ -94,13 +98,13 @@ end
 -- ============================================================================
 
 function UI.handleNoModule()
-  UI.drawAlert("  No ExpressLRS", {
-    " Enable a CRSF Internal",
-    "   or External module in",
-    "       Model settings",
-    "  If module is internal",
-    " also set Internal RF to",
-    " CRSF in SYS->Hardware",
+  UI.drawAlert(" No ExpressLRS", {
+    "Enable a CRSF Internal",
+    "  or External module in",
+    "      Model settings",
+    " If module is internal",
+    "also set Internal RF to",
+    "CRSF in SYS->Hardware",
   })
 end
 
@@ -128,6 +132,39 @@ function UI.render(event, _touchState)
     UI.forceRedraw = true
   end
 
+  -- Warning dismissal cooldown (60s before re-showing)
+  if UI.warningDismissedAt then
+    if Protocol.elrsFlags <= Protocol.CRSF.ELRS_FLAGS_STATUS_MASK then
+      if time - UI.warningDismissedAt > 6000 then
+        UI.warningDismissed = false
+        UI.warningDismissedAt = nil
+      end
+    elseif UI.warningDismissed and time - UI.warningDismissedAt > 6000 then
+      UI.warningDismissed = false
+      UI.warningDismissedAt = nil
+    end
+  end
+
+  -- Model mismatch alert (full-screen, blocks normal rendering)
+  if Protocol.isModelMismatch() and not UI.warningDismissed then
+    if event == EVT_VIRTUAL_ENTER then
+      UI.warningDismissed = true
+      UI.warningDismissedAt = getTime()
+      UI.forceRedraw = true
+      return
+    elseif event == EVT_VIRTUAL_EXIT then
+      App.shouldExit = true
+      return
+    end
+    UI.drawAlert("Model Mismatch", {
+      "RX connected but",
+      "Model ID doesn't match.",
+      "To use this receiver:",
+      "Disable Model Match",
+    }, { left = "[OK]", right = "[RTN] Change model" })
+    return
+  end
+
   -- Force redraw during loading to show progress bar
   if #Protocol.loadQueue > 0 then
     UI.forceRedraw = true
@@ -146,7 +183,7 @@ end
 -- Alert screen (clear screen + title + body messages)
 -- ============================================================================
 
-function UI.drawAlert(title, msgs)
+function UI.drawAlert(title, msgs, actions)
   lcd.clear()
   local y = 0
   lcd.drawText(2, y, title, MIDSIZE)
@@ -154,6 +191,15 @@ function UI.drawAlert(title, msgs)
   for _, msg in ipairs(msgs) do
     lcd.drawText(2, y, msg)
     y = y + UI.textSize
+  end
+  if actions then
+    y = y + UI.textSize
+    if actions.left then
+      lcd.drawText(2, y, actions.left, 0)
+    end
+    if actions.right then
+      lcd.drawText(LCD_W - 2, y, actions.right, RIGHT)
+    end
   end
 end
 
