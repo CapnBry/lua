@@ -420,7 +420,7 @@ function Protocol.fieldFloatLoad(field, data, offset)
     field.prec = 3
   end
   field.step = Protocol.fieldGetValue(data, offset + 17, 4)
-  field.fmt = shim.tableConcat({ "%.", tostring(field.prec), "f", field.unit or "" })
+  field.fmt = shim.tableConcat({ "%.", tostring(field.prec), "f" })
   field.prec = 10 ^ field.prec
 end
 
@@ -480,6 +480,23 @@ function Protocol.fieldIntSave(field)
   for i = size - 1, 0, -1 do
     frame[#frame + 1] = bit32.rshift(value, 8 * i) % 256
   end
+  Protocol.push(Protocol.CRSF.FRAMETYPE_PARAMETER_WRITE, frame)
+end
+
+function Protocol.fieldStringSave(field)
+  local frame = { Protocol.deviceId, Protocol.handsetId, field.id }
+  local val = field.value or ""
+  local maxlen = field.maxlen or 32
+  if #val > maxlen then
+    val = string.sub(val, 1, maxlen)
+  end
+  for i = 1, #val do
+    local b = string.byte(val, i)
+    if b ~= 0 then
+      frame[#frame + 1] = b
+    end
+  end
+  frame[#frame + 1] = 0
   Protocol.push(Protocol.CRSF.FRAMETYPE_PARAMETER_WRITE, frame)
 end
 
@@ -575,7 +592,7 @@ Protocol.handlers = {
   [Protocol.CRSF.INT64 + 1] = nil,
   [Protocol.CRSF.FLOAT + 1] = { load = Protocol.fieldFloatLoad, save = Protocol.fieldIntSave },
   [Protocol.CRSF.TEXT_SELECTION + 1] = { load = Protocol.fieldTextSelLoad, save = Protocol.fieldIntSave },
-  [Protocol.CRSF.STRING + 1] = { load = Protocol.fieldStringLoad, save = nil },
+  [Protocol.CRSF.STRING + 1] = { load = Protocol.fieldStringLoad, save = Protocol.fieldStringSave },
   [Protocol.CRSF.FOLDER + 1] = { load = Protocol.fieldFolderLoad, save = nil },
   [Protocol.CRSF.INFO + 1] = { load = Protocol.fieldStringLoad, save = nil },
   [Protocol.CRSF.COMMAND + 1] = { load = Protocol.fieldCommandLoad, save = Protocol.handleCommandSave },

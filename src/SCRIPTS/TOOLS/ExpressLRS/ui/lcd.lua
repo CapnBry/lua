@@ -378,7 +378,7 @@ local function fieldIntDisplay(field, y, attr)
 end
 
 local function fieldFloatDisplay(field, y, attr)
-  lcd.drawText(UI.COL2, y, string.format(field.fmt, field.value / field.prec), attr)
+  lcd.drawText(UI.COL2, y, string.format(field.fmt, field.value / field.prec) .. (field.unit or ""), attr)
 end
 
 local function fieldTextSelDisplay(field, y, attr)
