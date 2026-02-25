@@ -71,9 +71,9 @@ function ModelMismatchDialog.show(onContinue, onExit)
       flexPad = lvgl.PAD_SMALL,
       children = {
         { type = lvgl.LABEL, text = "Receiver connected but Model ID doesn't match." },
-        { type = lvgl.LABEL, text = "This prevents controlling the wrong model." },
-        { type = lvgl.LABEL, text = "To use this receiver:" },
-        { type = lvgl.LABEL, text = "Set Model Match to OFF" },
+        { type = lvgl.LABEL, text = "RC commands are blocked until resolved." },
+        { type = lvgl.LABEL, text = "Toggle the Model Match setting to" },
+        { type = lvgl.LABEL, text = "re-sync, or change the EdgeTX model." },
       },
     },
     {

@@ -1176,6 +1176,8 @@ end
 -- Widget lifecycle
 -- ============================================================================
 
+local lastBuilt6pos = -1
+
 local wgt = {
   zone = zone,
   options = options,
@@ -1190,6 +1192,10 @@ end
 
 function wgt.refresh(_event, _touchState)
   wgt.background()
+  if lvgl.isFullScreen() and Presets.lastPos ~= lastBuilt6pos then
+    lastBuilt6pos = Presets.lastPos
+    buildFullScreen()
+  end
 end
 
 function wgt.update(newOptions)
@@ -1199,7 +1205,9 @@ function wgt.update(newOptions)
       VTX.syncDesiredFromState()
     end
     buildFullScreen()
+    lastBuilt6pos = Presets.lastPos
   else
+    lastBuilt6pos = -1
     WidgetUI.build(wgt.zone, wgt.options)
   end
 end

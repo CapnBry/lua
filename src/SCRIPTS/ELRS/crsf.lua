@@ -17,7 +17,7 @@
 local CRSF = {}
 
 -- ============================================================================
--- Named protocol constants (no magic numbers anywhere)
+-- Named protocol constants
 -- ============================================================================
 
 CRSF.CONST = {

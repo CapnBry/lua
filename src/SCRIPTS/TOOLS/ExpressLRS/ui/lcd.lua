@@ -159,8 +159,8 @@ function UI.render(event, _touchState)
     UI.drawAlert("Model Mismatch", {
       "RX connected but",
       "Model ID doesn't match.",
-      "To use this receiver:",
-      "Disable Model Match",
+      "Toggle Model Match",
+      "to re-sync",
     }, { left = "[OK]", right = "[RTN] Change model" })
     return
   end
