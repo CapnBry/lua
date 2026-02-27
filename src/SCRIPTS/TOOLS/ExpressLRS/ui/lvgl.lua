@@ -845,7 +845,7 @@ function UI.createNumberRow(pg, field)
     edited = function(val)
       field.value = val
       Protocol.fieldIntSave(field)
-      Protocol.reloadParentFolder(field)
+      Protocol.reloadRelatedFields(field)
     end,
     display = function(val)
       if isFloat then
