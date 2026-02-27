@@ -296,9 +296,11 @@ local function encodeParameterEntry(device, param, _chunk, destAddr)
       end
     end
     data[#data + 1] = 0xFF -- terminator
-  elseif t == CRSF.INFO or t == CRSF.STRING then
-    -- INFO (read-only) and STRING (editable) both encode as null-terminated string
+  elseif t == CRSF.INFO then
     appendString(data, param.value or "")
+  elseif t == CRSF.STRING then
+    appendString(data, param.value or "")
+    data[#data + 1] = param.maxlen or 32
   elseif t == CRSF.UINT8 then
     -- value, min, max (1 byte each)
     data[#data + 1] = param.value or 0
@@ -381,7 +383,7 @@ local txDevice = {
   serialNo = CRSF.ELRS_SERIAL_ID,
   hwVer = 0,
   swVer = 0x00030500, -- 3.5.0
-  fieldCount = 21, -- total parameter count
+  fieldCount = 23, -- total parameter count
   params = {
     {
       id = 1,
@@ -533,11 +535,36 @@ local txDevice = {
       info = "",
     },
 
+    -- Editable string field
+    {
+      id = 20,
+      parent = 0,
+      type = CRSF.STRING,
+      name = "Bind Phrase",
+      value = "default",
+      maxlen = 16,
+    },
+
+    -- Float field (scaled integer with precision)
+    {
+      id = 21,
+      parent = 0,
+      type = CRSF.FLOAT,
+      name = "Freq Offset",
+      value = 0,
+      min = -5000,
+      max = 5000,
+      default = 0,
+      prec = 2,
+      step = 1,
+      units = "kHz",
+    },
+
     -- Bad/Good (hidden from ELRS Lua, visible to other UIs)
-    { id = 20, parent = 0, type = CRSF.INFO, name = "Bad/Good", value = "0/250", hidden = true },
+    { id = 22, parent = 0, type = CRSF.INFO, name = "Bad/Good", value = "0/250", hidden = true },
 
     -- Version + regulatory domain (name = version+domain, value = commit hash)
-    { id = 21, parent = 0, type = CRSF.INFO, name = "3.5.0 ISM2G4", value = "825ed8" },
+    { id = 23, parent = 0, type = CRSF.INFO, name = "3.5.0 ISM2G4", value = "825ed8" },
   },
 }
 
@@ -1100,9 +1127,33 @@ local function mockPush(command, data)
           local destAddr = data[2] or CRSF.ADDRESS_RADIO_TRANSMITTER
           queuePush(CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY, encodeParameterEntry(device, param, 0, destAddr))
         else
-          -- Value write: update the stored value immediately (matches
-          -- firmware config.Set*() which stores in RAM right away).
-          param.value = writeValue
+          -- Value write: decode based on field type
+          if t == CRSF.STRING then
+            local chars = {}
+            local i = 4
+            while data[i] and data[i] ~= 0 do
+              chars[#chars + 1] = data[i]
+              i = i + 1
+            end
+            param.value = (#chars > 0) and string.char(table.unpack(chars)) or ""
+          elseif t == CRSF.FLOAT then
+            local v = bit32.lshift(data[4] or 0, 24)
+              + bit32.lshift(data[5] or 0, 16)
+              + bit32.lshift(data[6] or 0, 8)
+              + (data[7] or 0)
+            if v >= 0x80000000 then
+              v = v - 0x100000000
+            end
+            param.value = v
+          elseif t == CRSF.UINT16 or t == CRSF.INT16 then
+            local v = bit32.lshift(data[4] or 0, 8) + (data[5] or 0)
+            if t == CRSF.INT16 and v >= 0x8000 then
+              v = v - 0x10000
+            end
+            param.value = v
+          else
+            param.value = writeValue
+          end
           -- Defer folder name and bandwidth updates to the next poll cycle.
           -- Real firmware runs updateFolderNames() in the event loop, not
           -- in the PARAMETER_WRITE handler. No auto-send of parent folder

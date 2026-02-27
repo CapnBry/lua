@@ -730,6 +730,7 @@ end
 
 local IS_NARROW = LCD_W < 400
 local LABEL_PCT = lvgl.PERCENT_SIZE + (IS_NARROW and 42 or 50)
+local VALUE_PCT = lvgl.PERCENT_SIZE + (IS_NARROW and 58 or 50)
 
 function UI.createToggleRow(pg, field)
   pg:setting({
@@ -830,40 +831,67 @@ function UI.createChoiceRow(pg, field)
 end
 
 function UI.createNumberRow(pg, field)
-  pg:build({
-    {
-      type = lvgl.SETTING,
-      w = lvgl.PERCENT_SIZE + 100,
-      title = field.name,
-      children = {
-        {
-          type = lvgl.NUMBER_EDIT,
-          x = LABEL_PCT,
-          min = field.min or 0,
-          max = field.max or 255,
-          get = function()
-            return field.value or 0
-          end,
-          set = function(val)
-            field.value = val
-          end,
-          edited = function(val)
-            field.value = val
-            Protocol.fieldIntSave(field)
-            Protocol.reloadParentFolder(field)
-          end,
-          display = function(val)
-            if field.type == Protocol.CRSF.FLOAT then
-              return string.format(field.fmt or "%.0f", val / (field.prec or 1))
-            end
-            return table.concat({ tostring(val), field.unit or "" })
-          end,
-          active = function()
-            return not field.disabled
-          end,
+  local isFloat = field.type == Protocol.CRSF.FLOAT
+  local numberEdit = {
+    type = lvgl.NUMBER_EDIT,
+    min = field.min or 0,
+    max = field.max or 255,
+    get = function()
+      return field.value or 0
+    end,
+    set = function(val)
+      field.value = val
+    end,
+    edited = function(val)
+      field.value = val
+      Protocol.fieldIntSave(field)
+      Protocol.reloadParentFolder(field)
+    end,
+    display = function(val)
+      if isFloat then
+        return string.format(field.fmt or "%.0f", val / (field.prec or 1))
+      end
+      return tostring(val)
+    end,
+    active = function()
+      return not field.disabled
+    end,
+  }
+
+  local children
+  if field.unit then
+    children = {
+      {
+        type = lvgl.BOX,
+        x = LABEL_PCT,
+        flexFlow = lvgl.FLOW_ROW,
+        flexPad = lvgl.PAD_MEDIUM,
+        align = LEFT,
+        children = {
+          numberEdit,
+          {
+            type = lvgl.BOX,
+            h = lvgl.UI_ELEMENT_HEIGHT,
+            children = {
+              {
+                type = lvgl.LABEL,
+                y = lvgl.PAD_MEDIUM,
+                text = field.unit,
+              },
+            },
+          },
         },
       },
-    },
+    }
+  else
+    numberEdit.x = LABEL_PCT
+    children = { numberEdit }
+  end
+
+  pg:setting({
+    w = lvgl.PERCENT_SIZE + 100,
+    title = field.name,
+    children = children,
   })
 end
 
@@ -878,6 +906,33 @@ function UI.createInfoRow(pg, field)
           type = lvgl.LABEL,
           x = LABEL_PCT,
           text = field.value,
+        },
+      },
+    },
+  })
+end
+
+function UI.createStringRow(pg, field)
+  pg:build({
+    {
+      type = lvgl.SETTING,
+      w = lvgl.PERCENT_SIZE + 100,
+      title = field.name,
+      children = {
+        {
+          type = lvgl.TEXT_EDIT,
+          x = LABEL_PCT,
+          w = VALUE_PCT,
+          value = field.value or "",
+          length = math.min(math.max(field.maxlen or 32, 32), 128),
+          set = function(val)
+            field.value = val
+            Protocol.fieldStringSave(field)
+            Protocol.reloadParentFolder(field)
+          end,
+          active = function()
+            return not field.disabled
+          end,
         },
       },
     },
@@ -932,7 +987,11 @@ function UI.buildFieldWidget(pg, field, folderWidth)
     end
   end
 
-  if fieldType == Protocol.CRSF.STRING or fieldType == Protocol.CRSF.INFO then
+  if fieldType == Protocol.CRSF.STRING then
+    return UI.createStringRow(pg, field)
+  end
+
+  if fieldType == Protocol.CRSF.INFO then
     return UI.createInfoRow(pg, field)
   end
 end
