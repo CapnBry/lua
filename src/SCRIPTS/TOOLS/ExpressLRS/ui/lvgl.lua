@@ -797,6 +797,7 @@ function UI.createChoiceRow(pg, field)
         children = {
           {
             type = lvgl.CHOICE,
+            title = field.name,
             values = filteredValues,
             get = function()
               return origToFiltered[field.value or 0] or 1

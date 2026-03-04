@@ -924,6 +924,7 @@ end
 local function createChoiceRow(container, label, values, getFn, setFn)
   local ctrl = createRow(container, label)
   ctrl:choice({
+    title = label,
     values = values,
     get = getFn,
     set = setFn,
