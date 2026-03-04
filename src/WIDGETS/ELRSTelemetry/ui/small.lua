@@ -39,7 +39,7 @@ local function heroColorMismatch()
 end
 
 local function detailColor()
-  if not crsf.rxConnected then
+  if not crsf.hasTelemetry then
     return COLOR_THEME_SECONDARY1
   end
   return Telemetry.rangeColor(Telemetry.smoothRng or 0)

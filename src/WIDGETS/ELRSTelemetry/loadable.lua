@@ -94,8 +94,8 @@ function Telemetry.statusText()
   if not crsf.hasCrsfModule() then
     return "No CRSF module"
   end
-  if not crsf.rxConnected then
-    return "No RX"
+  if not crsf.hasTelemetry then
+    return "No telemetry"
   end
   if crsf.modelMismatch then
     return "Model Mismatch"
@@ -127,7 +127,7 @@ end
 
 --- Get RF mode string from device info.
 function Telemetry.getRfModeStr(rfmd)
-  if not crsf.rxConnected or rfmd == nil then
+  if not crsf.hasTelemetry or rfmd == nil then
     return ""
   end
   local mod = crsf.deviceInfo
@@ -170,7 +170,7 @@ end
 
 --- Range percentage + RSSI text (e.g. "Range 69% -90dBm").
 function Telemetry.signalText()
-  if not crsf.rxConnected then
+  if not crsf.hasTelemetry then
     return ""
   end
   local tlm = Telemetry.readLink()
@@ -188,7 +188,7 @@ function Telemetry.rfDetailText()
   local tlm = Telemetry.readLink()
   local mode = Telemetry.getRfModeStr(tlm.rfmd)
   local parts = { mode }
-  if crsf.rxConnected and tlm.tpwr then
+  if crsf.hasTelemetry and tlm.tpwr then
     parts[#parts + 1] = table.concat({ tostring(tlm.tpwr), "mW" })
   end
   return table.concat(parts, " ")
@@ -351,8 +351,8 @@ local function buildFullScreen()
       if not Telemetry.hasModule() then
         return "No CRSF module"
       end
-      if not crsf.rxConnected then
-        return "No RX Connected"
+      if not crsf.hasTelemetry then
+        return "No telemetry"
       end
       if crsf.modelMismatch then
         return "Model Mismatch"
@@ -413,7 +413,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "Link Quality", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -421,7 +421,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "RSSI 1", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -432,7 +432,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "RSSI 2", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -448,7 +448,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "Active Antenna", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -459,7 +459,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "Range", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -471,7 +471,7 @@ local function buildFullScreen()
   createSectionHeader(fields, "Power")
 
   createDisplayRow(fields, "TX Power", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -482,7 +482,7 @@ local function buildFullScreen()
   end)
 
   createDisplayRow(fields, "Power Index", function()
-    if not crsf.rxConnected then
+    if not crsf.hasTelemetry then
       return "--"
     end
     local tlm = Telemetry.readLink()
@@ -586,7 +586,7 @@ function wgt.refresh(_event, _touchState)
   wgt.background()
 
   -- Update diversity detection each tick
-  if crsf.rxConnected then
+  if crsf.hasTelemetry then
     local tlm = Telemetry.readLink()
     Telemetry.updateDiversity(tlm.ant)
   end

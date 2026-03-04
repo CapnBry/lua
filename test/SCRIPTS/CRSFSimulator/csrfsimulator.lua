@@ -16,7 +16,7 @@
 -- Scenarios:
 --   "normal"         TX + RX connected. Happy path with full telemetry, link
 --                    stats, and all parameters from both devices.
---   "disconnected"   TX present but no RX. Shows "No link" in subtitle.
+--   "no_telemetry"   TX present but no RX telemetry. Shows "No telemetry" in subtitle.
 --                    No receiver device in Other Devices list.
 --   "reconnect"      Starts disconnected, then transitions to connected after
 --                    ~5 seconds. Tests auto-discovery of Other Devices on
@@ -32,7 +32,7 @@
 --   "no_module"      No CRSF module found at all. Triggers the "No Module
 --                    Found" error dialog immediately.
 local config = {
-  scenario = "normal",
+  scenario = "no_telemetry",
 }
 
 -- ============================================================================
@@ -946,7 +946,7 @@ local function isRxAvailable()
     end
     return getTime() - startTime >= reconnectDelay
   end
-  return config.scenario ~= "disconnected"
+  return config.scenario ~= "no_telemetry"
 end
 
 -- ELRS Lua flag bits (from TXModuleEndpoint.h):
@@ -967,7 +967,7 @@ local function getElrsFlags()
   elseif config.scenario == "normal" or config.scenario == "slow_loading" then
     return 0x01 -- connected
   else
-    return 0x00 -- disconnected
+    return 0x00 -- no telemetry
   end
 end
 

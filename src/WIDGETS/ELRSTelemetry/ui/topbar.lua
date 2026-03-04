@@ -43,7 +43,7 @@ function TopBarUI.build(w, h)
             if crsf.modelMismatch then
               return "Model"
             end
-            if not crsf.rxConnected then
+            if not crsf.hasTelemetry then
               return "--"
             end
             local tlm = Telemetry.readLink()
@@ -64,7 +64,7 @@ function TopBarUI.build(w, h)
             if crsf.modelMismatch then
               return "Mismatch"
             end
-            if not crsf.rxConnected then
+            if not crsf.hasTelemetry then
               return "--"
             end
             local tlm = Telemetry.readLink()

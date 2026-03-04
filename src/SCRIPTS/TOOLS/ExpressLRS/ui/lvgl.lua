@@ -664,7 +664,7 @@ function UI.getSubtitle()
 
   local subtitle = ""
   if Protocol.receivedPackets then
-    local state = Protocol.isConnected() and "Connected" or "No link"
+    local state = Protocol.hasTelemetry() and "Telemetry OK" or "No telemetry"
     subtitle = string.format("%u/%u • %s", Protocol.lostPackets, Protocol.receivedPackets, state)
   end
 

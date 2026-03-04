@@ -100,8 +100,8 @@ local Protocol = {
   expectChunksRemain = -1,
   backgroundLoading = false,
 
-  -- Connection transition tracking (for auto-discovery on reconnect)
-  wasConnected = false,
+  -- Telemetry transition tracking (for auto-discovery on reconnect)
+  hadTelemetry = false,
 }
 
 -- ============================================================================
@@ -135,7 +135,7 @@ function Protocol.reset()
   Protocol.loadQueue = {}
   Protocol.expectChunksRemain = -1
   Protocol.backgroundLoading = false
-  Protocol.wasConnected = false
+  Protocol.hadTelemetry = false
 end
 
 -- ============================================================================
@@ -157,8 +157,8 @@ function Protocol.pingDevices()
   )
 end
 
--- Check connection state from elrsFlags
-function Protocol.isConnected()
+-- Check if telemetry is being received from the RX (elrsFlags bit 1)
+function Protocol.hasTelemetry()
   return bit32.btest(Protocol.elrsFlags, 1)
 end
 
@@ -742,12 +742,12 @@ function Protocol.poll()
 end
 
 function Protocol.tick()
-  -- Ping on connection transition (device may have changed)
-  local connected = Protocol.isConnected()
-  if connected and not Protocol.wasConnected then
+  -- Ping on telemetry transition (device may have changed)
+  local hasTelemetry = Protocol.hasTelemetry()
+  if hasTelemetry and not Protocol.hadTelemetry then
     Protocol.pingDevices()
   end
-  Protocol.wasConnected = connected
+  Protocol.hadTelemetry = hasTelemetry
 
   local time = getTime()
   -- Periodic ping for initial device discovery

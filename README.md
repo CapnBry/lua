@@ -102,7 +102,7 @@ The simulator supports multiple test scenarios, configurable via the `config.sce
 | Scenario | Description |
 |----------|-------------|
 | `normal` | TX + RX connected. Happy path with full telemetry and all parameters. |
-| `disconnected` | TX present but no RX. Shows "No link" state. |
+| `no_telemetry` | TX present but no RX telemetry. Shows "No telemetry" state. |
 | `reconnect` | Starts disconnected, transitions to connected after ~5 seconds. |
 | `model_mismatch` | TX + RX connected with Model ID mismatch flag. Triggers warning dialog. |
 | `armed` | TX + RX connected with "is Armed" warning flag. |

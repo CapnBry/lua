@@ -70,8 +70,8 @@ CRSF._handlers = {}
 -- Device info cache (populated by built-in DEVICE_INFO handler)
 CRSF.deviceInfo = {}
 
--- RX connection state (populated by built-in ELRS_STATUS handler)
-CRSF.rxConnected = false
+-- Telemetry state (populated by built-in ELRS_STATUS handler)
+CRSF.hasTelemetry = false
 CRSF.modelMismatch = false
 CRSF.elrsFlags = 0
 CRSF.elrsFlagsInfo = ""
@@ -245,7 +245,7 @@ function CRSF:requestDeviceInfo()
 end
 
 --- Request ELRS status from the TX module (PARAMETER_WRITE with fieldId=0).
--- Updates rxConnected via the ELRS_STATUS handler on the next poll().
+-- Updates hasTelemetry via the ELRS_STATUS handler on the next poll().
 -- Rate-limited to at most once per second.
 function CRSF:requestElrsStatus()
   local now = getTime()
@@ -395,10 +395,10 @@ local function onDeviceInfo(data)
   end
 end
 
--- ELRS_STATUS handler: updates rxConnected, modelMismatch, elrsFlagsInfo
+-- ELRS_STATUS handler: updates hasTelemetry, modelMismatch, elrsFlagsInfo
 local function onElrsStatus(data)
   CRSF.elrsFlags = data[6] or 0
-  CRSF.rxConnected = bit32.btest(CRSF.elrsFlags, 1)
+  CRSF.hasTelemetry = bit32.btest(CRSF.elrsFlags, 1)
   CRSF.modelMismatch = bit32.btest(CRSF.elrsFlags, 4)
 
   -- Parse null-terminated warning info string starting at data[7]

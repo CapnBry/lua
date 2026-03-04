@@ -419,7 +419,7 @@ function UI.drawTitle()
   local barHeight = 9
   local goodBadPkt = ""
   if Protocol.receivedPackets then
-    local state = Protocol.isConnected() and "C" or "-"
+    local state = Protocol.hasTelemetry() and "C" or "-"
     goodBadPkt = string.format("%u/%u   %s", Protocol.lostPackets, Protocol.receivedPackets, state)
   end
 
