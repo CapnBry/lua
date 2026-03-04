@@ -949,9 +949,15 @@ function UI.createFolderWidget(pg, field, width)
 end
 
 function UI.createCommandWidget(pg, field)
-  pg:button({
-    text = field.name or "",
+  local wrapper = pg:box({
     w = lvgl.PERCENT_SIZE + 100,
+    flexFlow = lvgl.FLOW_COLUMN,
+    align = CENTER,
+    borderPad = { top = lvgl.PAD_TINY, bottom = lvgl.PAD_TINY },
+  })
+  wrapper:button({
+    text = field.name or "",
+    w = lvgl.PERCENT_SIZE + 99,
     press = function()
       Protocol.handleCommandSave(field)
     end,
@@ -1026,9 +1032,15 @@ function UI.build()
   local currentFolder = Navigation.getCurrent()
 
   if currentFolder == Navigation.FOLDER_OTHER_DEVICES then
+    local devicesBox = fieldContainer:box({
+      w = lvgl.PERCENT_SIZE + 100,
+      flexFlow = lvgl.FLOW_COLUMN,
+      flexPad = lvgl.PAD_SMALL,
+      borderPad = lvgl.PAD_TINY,
+    })
     for _, device in ipairs(Protocol.devices) do
       if device.id ~= Protocol.deviceId then
-        fieldContainer:button({
+        devicesBox:button({
           text = device.name or "Unknown",
           w = lvgl.PERCENT_SIZE + 100,
           press = function()
@@ -1095,7 +1107,13 @@ function UI.build()
     end
 
     if currentFolder == nil and #Protocol.devices > 1 and not Navigation.hasDeviceEntry() then
-      fieldContainer:button({
+      local wrapper = fieldContainer:box({
+        w = lvgl.PERCENT_SIZE + 100,
+        flexFlow = lvgl.FLOW_COLUMN,
+        align = CENTER,
+        borderPad = lvgl.PAD_TINY,
+      })
+      wrapper:button({
         text = "Other Devices",
         w = lvgl.PERCENT_SIZE + 100,
         h = lvgl.UI_ELEMENT_HEIGHT * 2,

@@ -32,7 +32,7 @@
 --   "no_module"      No CRSF module found at all. Triggers the "No Module
 --                    Found" error dialog immediately.
 local config = {
-  scenario = "no_telemetry",
+  scenario = "normal",
 }
 
 -- ============================================================================

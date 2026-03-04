@@ -1079,14 +1079,20 @@ local function buildFullScreen()
     Protocol.writeConfig()
   end)
 
-  fields:button({
+  local sendWrapper = fields:box({
+    w = lvgl.PERCENT_SIZE + 100,
+    flexFlow = lvgl.FLOW_COLUMN,
+    align = CENTER,
+    borderPad = { top = lvgl.PAD_SMALL, bottom = lvgl.PAD_SMALL },
+  })
+  sendWrapper:button({
     text = function()
       if Protocol.isSending() then
         return "Sending..."
       end
       return "Send VTx"
     end,
-    w = lvgl.PERCENT_SIZE + 100,
+    w = lvgl.PERCENT_SIZE + 99,
     press = function()
       Protocol.writeConfig()
       Protocol.pushToVtx()
