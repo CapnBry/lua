@@ -1,6 +1,6 @@
 ---- #########################################################################
 ---- # LVGL UI: Color LCD rendering, dialogs, command pages               #
----- # For color LCD radios with EdgeTX 2.11.4+ LVGL support              #
+---- # For color LCD radios with EdgeTX 2.12+ LVGL support                #
 ---- #########################################################################
 
 local deps = ...
@@ -346,8 +346,6 @@ local function checkEdgeTxVersion()
       return tonumber(rc) >= 4
     end
     return true
-  elseif maj == 2 and minor == 11 and rev >= 5 then
-    return true
   end
 
   return false
@@ -373,7 +371,6 @@ local function showVersionRequired()
       flexPad = lvgl.PAD_SMALL,
       children = {
         { type = "label", text = "Requires EdgeTX:" },
-        { type = "label", text = "- 2.11.5 or later" },
         { type = "label", text = "- 2.12-rc4 or later" },
         { type = "label", text = "- 3.0 or later" },
       },
@@ -402,8 +399,8 @@ local function showLvglRequired()
   lcd.clear()
   lcd.drawText(5, 10, "LVGL support required", BOLD)
   lcd.drawText(5, 20, "Color LCD radio with", 0)
-  lcd.drawText(5, 30, "EdgeTX 2.11.5+, 2.12-rc4+,", 0)
-  lcd.drawText(5, 40, "or 3.0+ needed", 0)
+  lcd.drawText(5, 30, "EdgeTX 2.12-rc4+ or 3.0+", 0)
+  lcd.drawText(5, 40, "needed", 0)
 end
 
 -- ============================================================================
