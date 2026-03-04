@@ -8,23 +8,28 @@ LUALS_DIR := bin/lua-language-server
 LUALS := $(LUALS_DIR)/bin/lua-language-server
 LUALS_URL := https://github.com/LuaLS/lua-language-server/releases/download/$(LUALS_VERSION)/lua-language-server-$(LUALS_VERSION)-linux-x64.tar.gz
 
-.PHONY: help install-tools format format-check typecheck check
+.PHONY: help install-tools install-stylua install-luals format format-check typecheck check
 
 help:
 	@echo "Usage: make <target>"
 	@echo ""
-	@echo "  install-tools  Install stylua (via cargo) and lua-language-server"
-	@echo "  format         Format Lua files with stylua"
-	@echo "  format-check   Check formatting without modifying files"
-	@echo "  typecheck      Run lua-language-server type checking"
-	@echo "  check          Run format-check and typecheck"
+	@echo "  install-tools   Install stylua and lua-language-server"
+	@echo "  install-stylua  Install stylua (via cargo)"
+	@echo "  install-luals   Install lua-language-server"
+	@echo "  format          Format Lua files with stylua"
+	@echo "  format-check    Check formatting without modifying files"
+	@echo "  typecheck       Run lua-language-server type checking"
+	@echo "  check           Run format-check and typecheck"
 
-install-tools:
-	ec
+install-stylua:
 	@command -v cargo >/dev/null 2>&1 || { echo "cargo is required (install Rust: https://rustup.rs)"; exit 1; }
 	cargo install stylua --features lua53
+
+install-luals:
 	mkdir -p $(LUALS_DIR)
 	curl -fSL $(LUALS_URL) | tar xz -C $(LUALS_DIR)
+
+install-tools: install-stylua install-luals
 
 format:
 	stylua $(LUA_DIRS)

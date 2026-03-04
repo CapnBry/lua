@@ -9,8 +9,8 @@
     "io": "disable",
     "bit32": "disable"
   },
-  "workspace.library": ["types"],
-  "workspace.ignoreDir": ["bin", "types"],
+  "workspace.library": ["edgetx-lua-stdlib"],
+  "workspace.ignoreDir": ["bin", "edgetx-lua-stdlib"],
   "workspace.checkThirdParty": false,
   "diagnostics.disable": ["lowercase-global"]
 }
