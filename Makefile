@@ -8,7 +8,7 @@ LUALS_DIR := bin/lua-language-server
 LUALS := $(LUALS_DIR)/bin/lua-language-server
 LUALS_URL := https://github.com/LuaLS/lua-language-server/releases/download/$(LUALS_VERSION)/lua-language-server-$(LUALS_VERSION)-linux-x64.tar.gz
 
-.PHONY: help install-tools install-stylua install-luals format format-check typecheck check
+.PHONY: help install-tools install-stylua install-luals format format-check typecheck check sync
 
 help:
 	@echo "Usage: make <target>"
@@ -20,6 +20,7 @@ help:
 	@echo "  format-check    Check formatting without modifying files"
 	@echo "  typecheck       Run lua-language-server type checking"
 	@echo "  check           Run format-check and typecheck"
+	@echo "  sync            Sync source files to EdgeTX simulator SD card"
 
 install-stylua:
 	@command -v cargo >/dev/null 2>&1 || { echo "cargo is required (install Rust: https://rustup.rs)"; exit 1; }
@@ -41,3 +42,6 @@ typecheck:
 	$(LUALS) --check .
 
 check: format-check typecheck
+
+sync:
+	edgetx sync ../edgetx-sdcard
