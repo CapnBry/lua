@@ -249,7 +249,7 @@ function Protocol.getFolderLoadProgress(folderId)
   local loaded = 0
   for _, childId in ipairs(folder.children) do
     local child = Protocol.fields[childId]
-    if child and child.name then
+    if child and child.name and not child.reloading then
       loaded = loaded + 1
     end
   end
