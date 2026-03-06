@@ -1,6 +1,5 @@
 [package]
 name = "expresslrs"
-version = "1.0.0"
 description = "ExpressLRS Lua scripts and widgets for EdgeTX"
 source_dir = "src"
 
