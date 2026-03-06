@@ -21,7 +21,7 @@ help:
 	@echo "  typecheck       Run lua-language-server type checking"
 	@echo "  check           Run format-check and typecheck"
 	@echo "  sync            Sync source files to EdgeTX simulator SD card"
-	@echo "  push            Push source files to EdgeTX radio and eject"
+	@echo "  push            Install package to EdgeTX radio and eject"
 
 install-stylua:
 	@command -v cargo >/dev/null 2>&1 || { echo "cargo is required (install Rust: https://rustup.rs)"; exit 1; }
@@ -45,7 +45,7 @@ typecheck:
 check: format-check typecheck
 
 sync:
-	edgetx dev sync ../edgetx-sdcard
+	edgetx-cli dev sync ../edgetx-sdcard
 
 push:
-	edgetx dev push --eject
+	edgetx-cli pkg install . --eject

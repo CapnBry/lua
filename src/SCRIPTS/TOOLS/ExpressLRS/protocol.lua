@@ -249,7 +249,7 @@ function Protocol.getFolderLoadProgress(folderId)
   local loaded = 0
   for _, childId in ipairs(folder.children) do
     local child = Protocol.fields[childId]
-    if child and child.name then
+    if child and child.name and not child.reloading then
       loaded = loaded + 1
     end
   end
@@ -276,7 +276,7 @@ function Protocol.getFieldsInFolder(folderId)
   local result = {}
   for _, childId in ipairs(folder.children) do
     local child = Protocol.fields[childId]
-    if child and child.name and not child.hidden then
+    if child and child.name then
       result[#result + 1] = child
     end
   end
@@ -426,10 +426,24 @@ end
 
 function Protocol.fieldTextSelLoad(field, data, offset)
   local vcnt
-  local cached = field.dirty == nil and field.values
+  local oldValues = field.values
+  local cached = field.dirty == nil and oldValues
   field.values, offset, vcnt = Protocol.fieldGetStrOrOpts(data, offset, cached, true)
   if not cached then
     field.disabled = (vcnt <= 1) or nil
+    -- Preserve table identity if contents unchanged (avoids redundant Choice widget updates)
+    if oldValues and #oldValues == #field.values then
+      local same = true
+      for i = 1, #field.values do
+        if oldValues[i] ~= field.values[i] then
+          same = false
+          break
+        end
+      end
+      if same then
+        field.values = oldValues
+      end
+    end
   end
   field.value = data[offset]
   local unit = Protocol.fieldGetStrOrOpts(data, offset + 4)
@@ -527,13 +541,13 @@ function Protocol.reloadRelatedFields(field)
       and (siblingType < Protocol.CRSF.FOLDER or siblingType == Protocol.CRSF.INFO)
     then
       sibling.dirty = true
-      sibling.name = nil
+      sibling.reloading = true
       Protocol.loadQueue[#Protocol.loadQueue + 1] = fieldId
     end
   end
 
   field.dirty = true
-  field.name = nil
+  field.reloading = true
   Protocol.loadQueue[#Protocol.loadQueue + 1] = field.id
   Protocol.fieldTimeout = getTime() + 20
   Protocol.linkstatTimeout = Protocol.fieldTimeout + 100
@@ -654,10 +668,15 @@ function Protocol.parseParameterInfoMessage(data)
       field.id = fieldId
       field.parent = (Protocol.fieldData[offset] ~= 0) and Protocol.fieldData[offset] or nil
       field.type = bit32.band(Protocol.fieldData[offset + 1], 0x7f)
+      local wasHidden = field.hidden
       field.hidden = bit32.btest(Protocol.fieldData[offset + 1], 0x80) or nil
-      local cachedName = (not field.nameStale) and field.name or nil
+      if field.hidden ~= wasHidden then
+        Protocol.fieldHiddenChanged = true
+      end
+      local cachedName = (not field.nameStale and not field.reloading) and field.name or nil
       field.name, offset = Protocol.fieldGetStrOrOpts(Protocol.fieldData, offset + 2, cachedName)
       field.nameStale = nil
+      field.reloading = nil
       local handler = Protocol.handlers[field.type + 1]
       if handler and handler.load then
         handler.load(field, Protocol.fieldData, offset)

@@ -258,7 +258,9 @@ function UI.buildVisibleFields()
   else
     local fields = Protocol.getFieldsInFolder(currentFolder)
     for _, field in ipairs(fields) do
-      vf[#vf + 1] = field
+      if not field.hidden then
+        vf[#vf + 1] = field
+      end
     end
 
     if currentFolder == nil and #Protocol.devices > 1 and not Navigation.hasDeviceEntry() then

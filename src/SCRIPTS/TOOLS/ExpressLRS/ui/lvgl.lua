@@ -733,6 +733,7 @@ function UI.createToggleRow(pg, field)
   pg:setting({
     w = lvgl.PERCENT_SIZE + 100,
     title = field.name,
+    visible = function() return not field.hidden end,
     children = {
       {
         type = lvgl.BOX,
@@ -762,7 +763,7 @@ function UI.createToggleRow(pg, field)
               {
                 type = lvgl.LABEL,
                 y = lvgl.PAD_MEDIUM,
-                text = field.unit,
+                text = function() return field.unit or "" end,
               },
             },
           },
@@ -773,55 +774,59 @@ function UI.createToggleRow(pg, field)
 end
 
 function UI.createChoiceRow(pg, field)
-  local filteredValues = {}
-  local origToFiltered = {}
-  local filteredToOrig = {}
-  for i, v in ipairs(field.values or {}) do
-    if v ~= "" then
-      filteredValues[#filteredValues + 1] = v
-      origToFiltered[i - 1] = #filteredValues
-      filteredToOrig[#filteredValues] = i - 1
-    end
-  end
+  local valuesRef = field.values
+  local choiceWidget
 
-  pg:setting({
+  local setting = pg:setting({
     w = lvgl.PERCENT_SIZE + 100,
     title = field.name,
-    children = {
-      {
-        type = lvgl.BOX,
-        x = LABEL_PCT,
-        flexFlow = lvgl.FLOW_ROW,
-        flexPad = lvgl.PAD_MEDIUM,
-        align = LEFT,
-        children = {
-          {
-            type = lvgl.CHOICE,
-            title = field.name,
-            values = filteredValues,
-            get = function()
-              return origToFiltered[field.value or 0] or 1
-            end,
-            set = function(val)
-              field.value = filteredToOrig[val] or 0
-              Protocol.fieldIntSave(field)
-              Protocol.reloadRelatedFields(field)
-            end,
-            active = function()
-              return not field.disabled
-            end,
-          },
-          {
-            type = lvgl.BOX,
-            h = lvgl.UI_ELEMENT_HEIGHT,
-            children = {
-              {
-                type = lvgl.LABEL,
-                y = lvgl.PAD_MEDIUM,
-                text = field.unit,
-              },
-            },
-          },
+    visible = function()
+      if field.hidden then return false end
+      if field.values ~= valuesRef then
+        valuesRef = field.values
+        if choiceWidget then
+          choiceWidget:set({ values = field.values or {} })
+        end
+      end
+      return true
+    end,
+  })
+
+  local valueBox = setting:box({
+    x = LABEL_PCT,
+    flexFlow = lvgl.FLOW_ROW,
+    flexPad = lvgl.PAD_MEDIUM,
+    align = LEFT,
+  })
+
+  choiceWidget = valueBox:choice({
+    title = field.name,
+    values = field.values or {},
+    filter = function(index)
+      return (field.values and field.values[index] or "") ~= ""
+    end,
+    get = function()
+      return (field.value or 0) + 1
+    end,
+    set = function(val)
+      field.value = val - 1
+      Protocol.fieldIntSave(field)
+      Protocol.reloadRelatedFields(field)
+    end,
+    active = function()
+      return not field.disabled
+    end,
+  })
+
+  valueBox:build({
+    {
+      type = lvgl.BOX,
+      h = lvgl.UI_ELEMENT_HEIGHT,
+      children = {
+        {
+          type = lvgl.LABEL,
+          y = lvgl.PAD_MEDIUM,
+          text = function() return field.unit or "" end,
         },
       },
     },
@@ -874,7 +879,7 @@ function UI.createNumberRow(pg, field)
               {
                 type = lvgl.LABEL,
                 y = lvgl.PAD_MEDIUM,
-                text = field.unit,
+                text = function() return field.unit or "" end,
               },
             },
           },
@@ -889,6 +894,7 @@ function UI.createNumberRow(pg, field)
   pg:setting({
     w = lvgl.PERCENT_SIZE + 100,
     title = field.name,
+    visible = function() return not field.hidden end,
     children = children,
   })
 end
@@ -899,11 +905,12 @@ function UI.createInfoRow(pg, field)
       type = lvgl.SETTING,
       w = lvgl.PERCENT_SIZE + 100,
       title = field.name,
+      visible = function() return not field.hidden end,
       children = {
         {
           type = lvgl.LABEL,
           x = LABEL_PCT,
-          text = field.value,
+          text = function() return field.value or "" end,
         },
       },
     },
@@ -916,6 +923,7 @@ function UI.createStringRow(pg, field)
       type = lvgl.SETTING,
       w = lvgl.PERCENT_SIZE + 100,
       title = field.name,
+      visible = function() return not field.hidden end,
       children = {
         {
           type = lvgl.TEXT_EDIT,
@@ -939,7 +947,8 @@ end
 
 function UI.createFolderWidget(pg, field, width)
   pg:button({
-    text = field.name or "",
+    text = function() return field.name or "" end,
+    visible = function() return not field.hidden end,
     w = width or (lvgl.PERCENT_SIZE + 100),
     h = lvgl.UI_ELEMENT_HEIGHT * 2,
     press = function()
@@ -954,9 +963,10 @@ function UI.createCommandWidget(pg, field)
     flexFlow = lvgl.FLOW_COLUMN,
     align = CENTER,
     borderPad = { top = lvgl.PAD_TINY, bottom = lvgl.PAD_TINY },
+    visible = function() return not field.hidden end,
   })
   wrapper:button({
-    text = field.name or "",
+    text = function() return field.name or "" end,
     w = lvgl.PERCENT_SIZE + 99,
     press = function()
       Protocol.handleCommandSave(field)
@@ -965,7 +975,7 @@ function UI.createCommandWidget(pg, field)
 end
 
 function UI.buildFieldWidget(pg, field, folderWidth)
-  if not field or not field.name then
+  if not field then
     return
   end
 
