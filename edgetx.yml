@@ -9,6 +9,9 @@ libraries:
   - name: ELRS
     path: SCRIPTS/ELRS
 
+  - name: CRSFSimulator
+    path: SCRIPTS/CRSFSimulator
+
 tools:
   - name: ExpressLRS
     path: SCRIPTS/TOOLS/ExpressLRS
