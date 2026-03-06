@@ -11,6 +11,7 @@ libraries:
 
   - name: CRSFSimulator
     path: SCRIPTS/CRSFSimulator
+    dev: true
 
 tools:
   - name: ExpressLRS
