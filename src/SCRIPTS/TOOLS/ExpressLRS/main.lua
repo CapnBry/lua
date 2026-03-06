@@ -189,6 +189,11 @@ local function run(event, touchState)
   end
   UI.folderWasReady = folderReady
 
+  if Protocol.fieldHiddenChanged then
+    Protocol.fieldHiddenChanged = nil
+    UI.visibleFields = nil
+  end
+
   UI.render(event, touchState)
 
   if App.shouldExit then
