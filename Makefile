@@ -1,7 +1,4 @@
 SRC_DIR := src
-TEST_DIR := test
-
-LUA_DIRS := $(SRC_DIR) $(TEST_DIR)
 
 LUALS_VERSION := 3.17.1
 LUALS_DIR := bin/lua-language-server
@@ -34,10 +31,10 @@ install-luals:
 install-tools: install-stylua install-luals
 
 format:
-	stylua $(LUA_DIRS)
+	stylua $(SRC_DIR)
 
 format-check:
-	stylua --check $(LUA_DIRS)
+	stylua --check $(SRC_DIR)
 
 typecheck:
 	$(LUALS) --check .
