@@ -44,6 +44,16 @@ WIDGETS/
 
 The shared library `SCRIPTS/ELRS/crsf.lua` is required by both widgets.
 
+### Install with edgetx-cli
+
+You can also install this package using [edgetx-cli](https://github.com/jurgelenas/edgetx-cli):
+
+```sh
+edgetx-cli pkg install ExpressLRS/Lua-Scripts@unified-lua-lsp
+```
+
+Use the `--eject` flag to automatically unmount the SD card after installation.
+
 ## ExpressLRS Configuration Tool
 
 The main tool (`SCRIPTS/TOOLS/ExpressLRS/`) lets you configure your ExpressLRS transmitter and receiver settings directly from your radio.
