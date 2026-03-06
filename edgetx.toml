@@ -1,6 +1,7 @@
 [package]
 name = "expresslrs"
 description = "ExpressLRS Lua scripts and widgets for EdgeTX"
+license = "GPL-3.0"
 source_dir = "src"
 
 [[libraries]]
