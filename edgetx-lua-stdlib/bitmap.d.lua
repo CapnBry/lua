@@ -39,6 +39,8 @@ function bitmap.resize(bmp, width, height) end
 ---@return string mask Binary mask data
 function bitmap.toMask(bmp) end
 
+---@diagnostic disable: deprecated
+
 --- @deprecated Use `bitmap` module instead.
 ---@class Bitmap
 Bitmap = {}
