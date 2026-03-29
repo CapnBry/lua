@@ -123,5 +123,5 @@ The simulator supports multiple test scenarios, configurable via the `config.sce
 
 | Radio type | Firmware | ExpressLRS |
 |------------|----------|------------|
-| Black & white LCD | EdgeTX 2.12-rc4+ or 3.0+ | v3.0+ |
-| Color LCD | EdgeTX 2.12-rc4+ or 3.0+ | v3.0+ |
+| Black & white LCD | EdgeTX 2.12+ or 3.0+ | v3.0+ |
+| Color LCD | EdgeTX 2.12+ or 3.0+ | v3.0+ |

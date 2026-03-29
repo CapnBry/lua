@@ -338,13 +338,7 @@ local function checkEdgeTxVersion()
 
   if maj >= 3 then
     return true
-  elseif maj == 2 and minor >= 13 then
-    return true
-  elseif maj == 2 and minor == 12 then
-    local rc = string.match(ver, "%-rc(%d+)")
-    if rc then
-      return tonumber(rc) >= 4
-    end
+  elseif maj == 2 and minor >= 12 then
     return true
   end
 
@@ -371,7 +365,7 @@ local function showVersionRequired()
       flexPad = lvgl.PAD_SMALL,
       children = {
         { type = "label", text = "Requires EdgeTX:" },
-        { type = "label", text = "- 2.12-rc4 or later" },
+        { type = "label", text = "- 2.12 or later" },
         { type = "label", text = "- 3.0 or later" },
       },
     },
@@ -399,7 +393,7 @@ local function showLvglRequired()
   lcd.clear()
   lcd.drawText(5, 10, "LVGL support required", BOLD)
   lcd.drawText(5, 20, "Color LCD radio with", 0)
-  lcd.drawText(5, 30, "EdgeTX 2.12-rc4+ or 3.0+", 0)
+  lcd.drawText(5, 30, "EdgeTX 2.12+ or 3.0+", 0)
   lcd.drawText(5, 40, "needed", 0)
 end
 
