@@ -681,33 +681,6 @@ end
 -- Field value increment
 -- ============================================================================
 
-function UI.incrField(field, step)
-  local min, max = 0, 0
-  if field.type <= Protocol.CRSF.FLOAT then
-    min = field.min or 0
-    max = field.max or 0
-    step = (field.step or 1) * step
-  elseif field.type == Protocol.CRSF.TEXT_SELECTION then
-    min = 0
-    max = #field.values - 1
-  end
-
-  local newval = field.value
-  repeat
-    newval = newval + step
-    if newval < min then
-      newval = min
-    elseif newval > max then
-      newval = max
-    end
-
-    if field.values == nil or #field.values[newval + 1] ~= 0 then
-      field.value = newval
-      return
-    end
-  until newval == min or newval == max
-end
-
 function UI.isBooleanField(field)
   if not field.values or #field.values ~= 2 then
     return false
