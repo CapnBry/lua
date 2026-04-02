@@ -95,6 +95,20 @@ local rateConfigs = {
 }
 
 -- ============================================================================
+-- Per-channel PWM output config (mirrors rx_config_pwm_t in firmware)
+-- Maps output channel index (1-4) to its Input Ch, Output Mode, and Invert.
+-- When Output Ch changes, siblings are loaded from this table.
+-- When siblings are edited, their values are saved back here.
+-- ============================================================================
+
+local pwmChannelConfig = {
+  [1] = { inputChannel = 1, mode = 0, inverted = 0 },
+  [2] = { inputChannel = 2, mode = 1, inverted = 0 },
+  [3] = { inputChannel = 3, mode = 2, inverted = 1 },
+  [4] = { inputChannel = 4, mode = 0, inverted = 0 },
+}
+
+-- ============================================================================
 -- FIFO Packet Queue
 -- ============================================================================
 
@@ -1154,6 +1168,46 @@ local function mockPush(command, data)
           else
             param.value = writeValue
           end
+          -- Output Mapping per-channel config: mimic firmware behavior
+          -- where changing Output Ch loads sibling values from per-channel config,
+          -- and editing siblings saves back to the current channel's config.
+          if device.id == CRSF.ADDRESS_CRSF_RECEIVER then
+            if param.id == 9 then
+              -- Output Ch changed: load config for the selected channel
+              local cfg = pwmChannelConfig[param.value]
+              if cfg then
+                local inputChParam = findParam(device, 10)
+                local outputModeParam = findParam(device, 11)
+                local invertParam = findParam(device, 12)
+                if inputChParam then
+                  inputChParam.value = cfg.inputChannel
+                end
+                if outputModeParam then
+                  outputModeParam.value = cfg.mode
+                end
+                if invertParam then
+                  invertParam.value = cfg.inverted
+                end
+              end
+            elseif param.id == 10 or param.id == 11 or param.id == 12 then
+              -- Sibling edited: save back to current output channel's config
+              local outputChParam = findParam(device, 9)
+              local ch = outputChParam and outputChParam.value or 1
+              local cfg = pwmChannelConfig[ch]
+              if cfg then
+                if param.id == 10 then
+                  cfg.inputChannel = param.value
+                end
+                if param.id == 11 then
+                  cfg.mode = param.value
+                end
+                if param.id == 12 then
+                  cfg.inverted = param.value
+                end
+              end
+            end
+          end
+
           -- Defer folder name and bandwidth updates to the next poll cycle.
           -- Real firmware runs updateFolderNames() in the event loop, not
           -- in the PARAMETER_WRITE handler. No auto-send of parent folder
