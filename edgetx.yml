@@ -1,5 +1,5 @@
 package:
-  id: expresslrs
+  id: github.com/ExpressLRS/Lua-Scripts
   name: ExpressLRS
   description: ExpressLRS Lua scripts and widgets
   authors:
@@ -20,7 +20,7 @@ package:
     - expresslrs
     - elrs
     - telemetry
-  license: GPL-3.0
+  license: GPL-3.0-only
   source_dir: src
   min_edgetx_version: "2.12.0"
 
