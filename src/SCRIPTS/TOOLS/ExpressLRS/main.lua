@@ -5,7 +5,7 @@
 ---- #                                                                       #
 ---- # License GPLv2: http://www.gnu.org/licenses/gpl-2.0.html               #
 ---- #                                                                       #
----- # Unified tool for BW and color LCD radios (EdgeTX 2.12+)               #
+---- # Unified tool for BW and color LCD radios (EdgeTX 2.11.6+/2.12.1+)     #
 ---- #########################################################################
 
 local VERSION = "r2"
@@ -145,9 +145,9 @@ local function run(event, touchState)
     return 2
   end
 
-  -- UI-specific pre-checks (LVGL: version/availability check; BW: not defined)
+  -- UI-specific pre-checks (version check on both LVGL and BW paths)
   if UI.preCheck then
-    local result = UI.preCheck()
+    local result = UI.preCheck(event)
     if result ~= nil then
       return result
     end

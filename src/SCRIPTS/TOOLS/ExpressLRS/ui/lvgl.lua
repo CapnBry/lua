@@ -1,6 +1,6 @@
 ---- #########################################################################
 ---- # LVGL UI: Color LCD rendering, dialogs, command pages               #
----- # For color LCD radios with EdgeTX 2.12+ LVGL support                #
+---- # For color LCD radios with EdgeTX 2.12.1+ LVGL support              #
 ---- #########################################################################
 
 local deps = ...
@@ -334,11 +334,13 @@ end
 local versionCheckResult = nil
 
 local function checkEdgeTxVersion()
-  local ver, _radio, maj, minor, rev = getVersion()
+  local _ver, _radio, maj, minor, rev = getVersion()
 
   if maj >= 3 then
     return true
-  elseif maj == 2 and minor >= 12 then
+  elseif maj == 2 and minor == 12 and rev >= 1 then
+    return true
+  elseif maj == 2 and minor == 11 and rev >= 6 then
     return true
   end
 
@@ -365,7 +367,8 @@ local function showVersionRequired()
       flexPad = lvgl.PAD_SMALL,
       children = {
         { type = "label", text = "Requires EdgeTX:" },
-        { type = "label", text = "- 2.12 or later" },
+        { type = "label", text = "- 2.11.6 or later" },
+        { type = "label", text = "- 2.12.1 or later" },
         { type = "label", text = "- 3.0 or later" },
       },
     },
@@ -389,37 +392,21 @@ local function showVersionRequired()
   })
 end
 
-local function showLvglRequired()
-  lcd.clear()
-  lcd.drawText(5, 10, "LVGL support required", BOLD)
-  lcd.drawText(5, 20, "Color LCD radio with", 0)
-  lcd.drawText(5, 30, "EdgeTX 2.12+ or 3.0+", 0)
-  lcd.drawText(5, 40, "needed", 0)
-end
-
 -- ============================================================================
 -- Interface: init
 -- ============================================================================
 
 function UI.init()
-  if lvgl == nil then
-    return
-  end
   if VERSION_CHECK_ENABLED then
     versionCheckResult = checkEdgeTxVersion()
   end
 end
 
 -- ============================================================================
--- Interface: preCheck (LVGL-specific: version/availability)
+-- Interface: preCheck (version gate)
 -- ============================================================================
 
-function UI.preCheck()
-  if lvgl == nil then
-    showLvglRequired()
-    return 0
-  end
-
+function UI.preCheck(_event)
   if versionCheckResult == false then
     if not UI.uiBuilt then
       showVersionRequired()

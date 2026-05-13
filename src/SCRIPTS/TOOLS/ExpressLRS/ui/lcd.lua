@@ -10,6 +10,23 @@ local Navigation = deps.Navigation
 local Protocol = deps.Protocol
 local VERSION = deps.VERSION
 
+local VERSION_CHECK_ENABLED = true
+local versionCheckResult = nil
+
+local function checkEdgeTxVersion()
+  local _ver, _radio, maj, minor, rev = getVersion()
+
+  if maj >= 3 then
+    return true
+  elseif maj == 2 and minor == 12 and rev >= 1 then
+    return true
+  elseif maj == 2 and minor == 11 and rev >= 6 then
+    return true
+  end
+
+  return false
+end
+
 -- ============================================================================
 -- UI state
 -- ============================================================================
@@ -64,6 +81,31 @@ function UI.init()
   UI.COL1 = 0
   UI.textYoffset = 3
   UI.textSize = 8
+
+  if VERSION_CHECK_ENABLED then
+    versionCheckResult = checkEdgeTxVersion()
+  end
+end
+
+-- ============================================================================
+-- Interface: preCheck (version gate)
+-- ============================================================================
+
+function UI.preCheck(event)
+  if versionCheckResult == false then
+    UI.drawAlert("EdgeTX Unsupported", {
+      "Requires EdgeTX:",
+      "- 2.11.6 or later",
+      "- 2.12.1 or later",
+      "- 3.0 or later",
+    })
+    if event == EVT_VIRTUAL_EXIT then
+      App.shouldExit = true
+      return 2
+    end
+    return 0
+  end
+  return nil
 end
 
 -- ============================================================================
