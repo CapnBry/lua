@@ -93,7 +93,7 @@ end
 
 function UI.preCheck(event)
   if versionCheckResult == false then
-    UI.drawAlert("EdgeTX Unsupported", {
+    UI.drawAlert("Unsupported", {
       "Requires EdgeTX:",
       "- 2.11.6 or later",
       "- 2.12.1 or later",
