@@ -49,7 +49,7 @@ The shared library `SCRIPTS/ELRS/crsf.lua` is required by both widgets.
 You can also install this package using [edgetx-cli](https://github.com/jurgelenas/edgetx-cli):
 
 ```sh
-edgetx-cli pkg install ExpressLRS/Lua-Scripts@unified-lua-lsp
+edgetx-cli pkg install ExpressLRS/Lua-Scripts
 ```
 
 Use the `--eject` flag to automatically unmount the SD card after installation.
