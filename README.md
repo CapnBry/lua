@@ -93,9 +93,9 @@ The VTX Administrator widget (`WIDGETS/ELRSVTXAdmin/`) provides control over you
 
 ## CRSF Simulator (Testing)
 
-The `test/` directory contains a CRSF protocol simulator for development and testing without real hardware.
+The `src/SCRIPTS/CRSFSimulator/` library provides a CRSF protocol simulator for development and testing without real hardware. It is declared as a dev-only library in `edgetx.yml` (`dev: true`), so it is included by `edgetx-cli dev sync` but skipped by `edgetx-cli pkg install`.
 
-**File:** `test/SCRIPTS/CRSFSimulator/csrfsimulator.lua`
+**File:** `src/SCRIPTS/CRSFSimulator/csrfsimulator.lua`
 
 The simulator provides a packet-level mock of `crossfireTelemetryPop` and `crossfireTelemetryPush`, allowing the ELRS tool to exercise the full communication flow (device discovery, parameter loading, value writes, ELRS status) inside the EdgeTX simulator. Multiple scenarios are available to simulate different states such as normal operation, disconnected links, model mismatch, and more.
 
@@ -103,7 +103,7 @@ The simulator provides a packet-level mock of `crossfireTelemetryPop` and `cross
 
 When the tool detects it is running in the EdgeTX simulator (version string ends with `-simu`), `main.lua` automatically loads the simulator module from `/SCRIPTS/CRSFSimulator/csrfsimulator.lua` and patches the protocol's `pop`, `push`, and `hasCrsfModule` functions with the mock implementations.
 
-To use the simulator, copy the `test/` directory contents onto the SD card alongside `src/` so that `SCRIPTS/CRSFSimulator/csrfsimulator.lua` is present. The simulator is ignored on real hardware.
+Run `make sync` (which runs `edgetx-cli dev sync`) to copy the sources -- including the dev-only `CRSFSimulator` library -- onto the simulator SD card. `edgetx-cli pkg install` omits the library automatically, so the simulator is never shipped to real hardware.
 
 ### Scenarios
 
