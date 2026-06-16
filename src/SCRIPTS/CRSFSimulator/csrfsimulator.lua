@@ -547,6 +547,9 @@ local txDevice = {
       status = CRSF.CMD_IDLE,
       timeout = 50,
       info = "",
+      -- Emits a different status string on each CMD_QUERY poll so the UI can be
+      -- checked for live status updates while a command is executing.
+      progress = { "Binding...", "Waiting for RX...", "RX found", "Saving..." },
     },
 
     -- Editable string field
@@ -1025,10 +1028,17 @@ local function handleCommandWrite(device, param, newStatus)
       -- Go straight to executing (matches real ELRS firmware behavior:
       -- most commands skip confirmation and execute immediately)
       state.status = CRSF.CMD_EXECUTING
-      state.info = "Executing..."
       if param.persistent then
+        state.info = "Executing..."
         state.queriesRemaining = nil -- runs until cancelled (e.g., WiFi)
+      elseif param.progress then
+        -- Step through the status strings, one per CMD_QUERY poll, so the
+        -- updated info text from the device can be observed in the UI.
+        state.progressIndex = 1
+        state.info = param.progress[1]
+        state.queriesRemaining = #param.progress
       else
+        state.info = "Executing..."
         state.queriesRemaining = COMMAND_EXECUTE_POLLS
       end
     end
@@ -1043,6 +1053,10 @@ local function handleCommandWrite(device, param, newStatus)
       if state.queriesRemaining <= 0 then
         state.status = CRSF.CMD_IDLE
         state.info = "Complete"
+      elseif param.progress then
+        -- Advance to the next status string for this poll.
+        state.progressIndex = (state.progressIndex or 1) + 1
+        state.info = param.progress[state.progressIndex] or state.info
       end
     end
   end

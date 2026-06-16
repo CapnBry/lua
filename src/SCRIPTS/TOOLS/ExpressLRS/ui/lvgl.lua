@@ -191,7 +191,7 @@ local function createSpinner(parent)
   })
 end
 
-function CommandPage.showConfirm(name, info, onConfirm, onCancel)
+function CommandPage.showConfirm(name, getInfo, onConfirm, onCancel)
   lvgl.clear()
   local pg = lvgl.page({
     title = "ExpressLRS",
@@ -226,7 +226,8 @@ function CommandPage.showConfirm(name, info, onConfirm, onCancel)
       w = lvgl.PERCENT_SIZE + 100,
       align = CENTER,
       color = COLOR_THEME_DISABLED,
-      text = info or "",
+      -- Prompt supplied by the caller as a getter so it refreshes each frame
+      text = getInfo,
     },
     {
       type = lvgl.RECTANGLE,
@@ -261,7 +262,7 @@ function CommandPage.showConfirm(name, info, onConfirm, onCancel)
   return pg
 end
 
-function CommandPage.showExecuting(title, onCancel)
+function CommandPage.showExecuting(title, getInfo, onCancel)
   lvgl.clear()
   local pg = lvgl.page({
     title = "ExpressLRS",
@@ -287,6 +288,21 @@ function CommandPage.showExecuting(title, onCancel)
   })
   createSpinner(container)
   container:build({
+    {
+      type = lvgl.RECTANGLE,
+      w = lvgl.PERCENT_SIZE + 100,
+      h = lvgl.PAD_LARGE,
+      thickness = 0,
+    },
+    {
+      -- Live status text the device sends back while the command runs.
+      -- Supplied by the caller as a getter so each CMD_QUERY poll response is shown.
+      type = lvgl.LABEL,
+      w = lvgl.PERCENT_SIZE + 100,
+      align = CENTER,
+      font = BOLD,
+      text = getInfo,
+    },
     {
       type = lvgl.RECTANGLE,
       w = lvgl.PERCENT_SIZE + 100,
@@ -538,15 +554,20 @@ local function handleCommandPopup()
     UI.invalidate()
   elseif Protocol.fieldPopup.status == Protocol.CRSF.CMD_ASKCONFIRM then
     if not UI.commandDialog or Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_ASKCONFIRM then
-      UI.commandDialog = CommandPage.showConfirm(Protocol.fieldPopup.name, Protocol.fieldPopup.info, function()
+      local field = Protocol.fieldPopup
+      UI.commandDialog = CommandPage.showConfirm(field.name, function()
+        return field.info or ""
+      end, function()
         Protocol.commandConfirm()
       end, onCommandCancel)
     end
     Protocol.fieldPopup.lastStatus = Protocol.fieldPopup.status
   elseif Protocol.fieldPopup.status == Protocol.CRSF.CMD_EXECUTING then
     if not UI.commandDialog or Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_EXECUTING then
-      UI.commandDialog =
-        CommandPage.showExecuting(Protocol.fieldPopup.name or Protocol.fieldPopup.info, onCommandCancel)
+      local field = Protocol.fieldPopup
+      UI.commandDialog = CommandPage.showExecuting(field.name, function()
+        return field.info or ""
+      end, onCommandCancel)
     end
     Protocol.fieldPopup.lastStatus = Protocol.fieldPopup.status
   end
