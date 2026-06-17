@@ -1055,6 +1055,11 @@ function UI.build()
     end
   else
     local fieldsInFolder = Protocol.getFieldsInFolder(currentFolder)
+
+    if currentFolder == nil then
+      UI.createInfoRow(fieldContainer, { name = "Device name", value = Protocol.deviceName or "Searching..." })
+    end
+
     local FOLDERS_PER_ROW = 2
     if IS_NARROW then
       FOLDERS_PER_ROW = 1
@@ -1104,10 +1109,6 @@ function UI.build()
 
     if currentFolder == nil and Protocol.deviceIsELRS_TX then
       UI.createInfoRow(fieldContainer, { name = "Lua script version", value = VERSION })
-    end
-
-    if currentFolder == nil then
-      UI.createInfoRow(fieldContainer, { name = "Device name", value = Protocol.deviceName or "Searching..." })
     end
 
     if currentFolder == nil and #Protocol.devices > 1 and not Navigation.hasDeviceEntry() then
