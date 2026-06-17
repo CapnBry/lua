@@ -397,7 +397,7 @@ local txDevice = {
   serialNo = CRSF.ELRS_SERIAL_ID,
   hwVer = 0,
   swVer = 0x00030500, -- 3.5.0
-  fieldCount = 23, -- total parameter count
+  fieldCount = 24, -- total parameter count
   params = {
     {
       id = 1,
@@ -551,6 +551,12 @@ local txDevice = {
       -- checked for live status updates while a command is executing.
       progress = { "Binding...", "Waiting for RX...", "RX found", "Saving..." },
     },
+
+    -- Mirrors the Bind Phrase value. Editing the string below rewrites this INFO field
+    -- on the device side, so it only updates in the UI if the STRING write reloads its
+    -- sibling fields (reloadRelatedFields, not reloadParentFolder). Placed directly above
+    -- Bind Phrase so both stay on screen together while editing.
+    { id = 24, parent = 0, type = CRSF.INFO, name = "Phrase Echo", value = "default" },
 
     -- Editable string field
     {
@@ -1200,6 +1206,14 @@ local function mockPush(command, data)
               i = i + 1
             end
             param.value = (#chars > 0) and string.char(table.unpack(chars)) or ""
+            -- Bind Phrase: mirror into the Phrase Echo INFO sibling so the UI only
+            -- reflects the change if the STRING write reloads sibling fields.
+            if param.id == 20 then
+              local echo = findParam(device, 24)
+              if echo then
+                echo.value = param.value
+              end
+            end
           elseif t == CRSF.FLOAT then
             local v = bit32.lshift(data[4] or 0, 24)
               + bit32.lshift(data[5] or 0, 16)
