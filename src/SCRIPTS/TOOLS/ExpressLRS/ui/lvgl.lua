@@ -920,7 +920,7 @@ function UI.createStringRow(pg, field)
           set = function(val)
             field.value = val
             Protocol.fieldStringSave(field)
-            Protocol.reloadParentFolder(field)
+            Protocol.reloadRelatedFields(field)
           end,
           active = function()
             return not field.disabled
