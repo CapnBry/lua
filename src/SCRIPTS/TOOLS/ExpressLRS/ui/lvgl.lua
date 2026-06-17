@@ -545,14 +545,7 @@ local function handleCommandPopup()
     return
   end
 
-  if
-    Protocol.fieldPopup.status == Protocol.CRSF.CMD_IDLE and Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_IDLE
-  then
-    Protocol.reloadAllFields()
-    Protocol.fieldPopup = nil
-    UI.commandDialog = nil
-    UI.invalidate()
-  elseif Protocol.fieldPopup.status == Protocol.CRSF.CMD_ASKCONFIRM then
+  if Protocol.fieldPopup.status == Protocol.CRSF.CMD_ASKCONFIRM then
     if not UI.commandDialog or Protocol.fieldPopup.lastStatus ~= Protocol.CRSF.CMD_ASKCONFIRM then
       local field = Protocol.fieldPopup
       UI.commandDialog = CommandPage.showConfirm(field.name, function()

@@ -596,7 +596,7 @@ local rxDevice = {
   serialNo = CRSF.ELRS_SERIAL_ID,
   hwVer = 0,
   swVer = 0x00030500, -- 3.5.0
-  fieldCount = 22, -- total parameter count
+  fieldCount = 25, -- total parameter count
   params = {
     {
       id = 1,
@@ -723,9 +723,40 @@ local rxDevice = {
       units = "",
     },
 
+    -- Gyro folder: exercises a COMMAND that changes a sibling value, so the tool
+    -- must re-read the current page after the command completes (Lua-Scripts #8).
+    { id = 19, parent = 0, type = CRSF.FOLDER, name = "Gyro" },
+    {
+      id = 20,
+      parent = 19,
+      type = CRSF.TEXT_SELECTION,
+      name = "Orientation",
+      options = "Up;Down;Left;Right",
+      value = 0,
+      units = "",
+    },
+    {
+      id = 21,
+      parent = 19,
+      type = CRSF.COMMAND,
+      name = "Detect Orientation",
+      status = CRSF.CMD_IDLE,
+      timeout = 50,
+      info = "",
+      -- Progress steps make the executing popup observable before completion.
+      progress = { "Detecting...", "Reading IMU..." },
+      -- On completion, cycle the Orientation value so each run visibly changes it.
+      onComplete = function(device, findParam)
+        local o = findParam(device, 20)
+        if o then
+          o.value = ((o.value or 0) + 1) % 4
+        end
+      end,
+    },
+
     -- Bind Storage & Bind Mode
     {
-      id = 19,
+      id = 22,
       parent = 0,
       type = CRSF.TEXT_SELECTION,
       name = "Bind Storage",
@@ -734,7 +765,7 @@ local rxDevice = {
       units = "",
     },
     {
-      id = 20,
+      id = 23,
       parent = 0,
       type = CRSF.COMMAND,
       name = "Enter Bind Mode",
@@ -744,10 +775,10 @@ local rxDevice = {
     },
 
     -- Model Id
-    { id = 21, parent = 0, type = CRSF.INFO, name = "Model Id", value = "12" },
+    { id = 24, parent = 0, type = CRSF.INFO, name = "Model Id", value = "12" },
 
     -- Info fields
-    { id = 22, parent = 0, type = CRSF.INFO, name = "RX Version", value = "3.5.0 825ed8" },
+    { id = 25, parent = 0, type = CRSF.INFO, name = "RX Version", value = "3.5.0 825ed8" },
   },
 }
 
@@ -1053,6 +1084,11 @@ local function handleCommandWrite(device, param, newStatus)
       if state.queriesRemaining <= 0 then
         state.status = CRSF.CMD_IDLE
         state.info = "Complete"
+        -- Command finished naturally: apply any side effects (e.g. a command
+        -- that updates a sibling value). Not run on CMD_CANCEL.
+        if param.onComplete then
+          param.onComplete(device, findParam)
+        end
       elseif param.progress then
         -- Advance to the next status string for this poll.
         state.progressIndex = (state.progressIndex or 1) + 1

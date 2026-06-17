@@ -464,6 +464,14 @@ function Protocol.fieldCommandLoad(field, data, offset)
   local info = Protocol.fieldGetStrOrOpts(data, offset + 2)
   field.info = (info ~= "") and info or nil
   if field.status == Protocol.CRSF.CMD_IDLE then
+    -- A command that was actively running just finished (or was cancelled):
+    -- re-read its same-level fields so the current page reflects any values the
+    -- command changed. The guard limits this to the active command -- routine
+    -- loads of idle command fields while browsing (fieldPopup is nil) must not
+    -- trigger a reload.
+    if Protocol.fieldPopup == field then
+      Protocol.reloadRelatedFields(field)
+    end
     Protocol.fieldPopup = nil
   end
 end
