@@ -9,7 +9,7 @@ package:
     - name: Homepage
       url: "https://www.expresslrs.org"
     - name: Repository
-      url: "https://github.com/ExpressLRS/ExpressLRS-Lua-Scripts"
+      url: "https://github.com/ExpressLRS/Lua-Scripts"
   screenshots:
     - screenshots/tool_main.png
     - screenshots/tool_main_bw.png
