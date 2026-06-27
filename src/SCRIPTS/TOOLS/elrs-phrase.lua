@@ -6,16 +6,15 @@ local CRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")()
 local targetIdx   = 1                 -- 1 = Transmitter, 2 = Receiver
 local bindPhrase  = ""
 local uidText     = ""
-local HISTORY_MAX = 5
-local history     = {}
 
 local MSP_ELRS_RXTX_CONFIG = 45
 local ELRS_RXTX_SUBCMD_UID = 0
 local ELRS_RXTX_SUBCMD_BIND_PHRASE = 1
 
-local deferCb
-local function deferSet(interval, fn, ctx)
-  deferCb = {
+local Defer = { _deferCb = nil }
+
+function Defer.setTimeout(interval, fn, ctx)
+  Defer._deferCb = {
     start = getTime(),
     interval = interval,
     fn = fn,
@@ -23,60 +22,66 @@ local function deferSet(interval, fn, ctx)
   }
 end
 
-local function deferClear()
-  deferCb = nil
+function Defer.clear()
+  Defer._deferCb = nil
 end
 
-local function deferCheck()
-  if deferCb == nil then return end
+function Defer.poll()
+  if Defer._deferCb == nil then return end
 
-  if getTime() - deferCb.start < deferCb.interval then
+  if getTime() - Defer._deferCb.start < Defer._deferCb.interval then
     return
   end
 
   -- clear the defer first, if the callback wants to set a new one
-  local oldcb = deferCb
-  deferCb = nil
+  local oldcb = Defer._deferCb
+  Defer._deferCb = nil
   oldcb.fn(oldcb.ctx)
 end
 
-local function addToHistory(s)
+local History = {
+  MAX = 5,
+  FNAME = "elrs-phrase.txt",
+  vals = {},
+}
+
+function History.add(s)
   if s == nil or s == "" then return end
 
   -- remove this value from the history list if already there
-  for idx = #history, 1, -1 do
-    if history[idx] == s then
-      table.remove(history, idx)
+  for idx = #History.vals, 1, -1 do
+    if History.vals[idx] == s then
+      table.remove(History.vals, idx)
     end
   end
 
-  table.insert(history, 1, s)
+  table.insert(History.vals, 1, s)
 
-  while #history > HISTORY_MAX do
-    table.remove(history)
+  while #History.vals > History.MAX do
+    table.remove(History.vals)
   end
 
-  local f = io.open("elrs-phrase.txt", "w")
+  local f = io.open(History.FNAME, "w")
   if f == nil then return end
-  io.write(f, table.concat(history, '\n'))
+  io.write(f, table.concat(History.vals, '\n'))
   io.close(f)
 end
 
-local function loadHistory()
-  local f = io.open("elrs-phrase.txt", "r")
+function History.load()
+  local f = io.open(History.FNAME, "r")
   if f == nil then return end
 
-  history = {}
-  local all = io.read(f, 64 * HISTORY_MAX)
+  History.vals = {}
+  local all = io.read(f, 64 * History.MAX)
   io.close(f)
 
   if all == nil or all == "" then return end
 
   for line in string.gmatch(all, "[^\n]+") do
-    history[#history + 1] = line
+    History.vals[#History.vals + 1] = line
   end
 
-  bindPhrase = history[1] or ""
+  return History.vals[1]
 end
 
 local function onMspResponse(data)
@@ -85,7 +90,7 @@ local function onMspResponse(data)
     local mspCmd = data[5]
 
     if mspCmd == MSP_ELRS_RXTX_CONFIG and data[6] == ELRS_RXTX_SUBCMD_UID then
-      deferClear()
+      Defer.clear()
       local rxTx = (data[2] == CRSF.CONST.ADDRESS_RX) and "RX" or "TX"
       uidText = string.format("%s: %d, %d, %d, %d, %d, %d",
           rxTx, data[7], data[8], data[9], data[10], data[11], data[12])
@@ -106,7 +111,7 @@ local function requestUid()
   })
 
   -- Retry if no response
-  deferSet(50, requestUid)
+   Defer.setTimeout(50, requestUid)
 end
 
 local function sendBindphrase()
@@ -128,20 +133,20 @@ local function sendBindphrase()
 
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
 
-  addToHistory(bindPhrase)
+   History.add(bindPhrase)
   -- refresh the UID in 1000ms
-  deferSet(100, requestUid)
+   Defer.setTimeout(100, requestUid)
 end
 
 local rebuildUi
 local function history_text(id)
-  return history[id]
+  return History.vals[id]
 end
 local function history_visible(id)
   return history_text(id) ~= nil
 end
 local function history_press(id)
-  bindPhrase = history[id]
+  bindPhrase = History.vals[id]
   rebuildUi()
 end
 
@@ -219,10 +224,10 @@ rebuildUi = function ()
     w = lvgl.PERCENT_SIZE + 100, y = 82,
     flexFlow    = lvgl.FLOW_COLUMN,
     flexPad     = lvgl.PAD_MEDIUM,
-    visible     = function () return #history end,
+    visible     = function () return #History.vals end,
   })
   row:label({text = "Bind Phrase History"})
-  for i = 1, HISTORY_MAX do
+   for i = 1, History.MAX do
       row:button({
         w = lvgl.PERCENT_SIZE + 80,
         text = function () return history_text(i) end,
@@ -235,11 +240,11 @@ end
 local function init()
   if lvgl == nil then return end
 
-  loadHistory()
+  bindPhrase = History.load() or ""
   rebuildUi()
 
   CRSF:registerHandler(CRSF.CONST.FRAMETYPE_MSP_RESP, onMspResponse)
-  deferSet(1, requestUid)
+   Defer.setTimeout(1, requestUid)
 end
 
 local function run(event, touchState)
@@ -250,7 +255,7 @@ local function run(event, touchState)
 
   CRSF:poll()
   -- Must come after poll so a telemetry queue is established
-  deferCheck()
+  Defer.poll()
 
   return 0
 end
