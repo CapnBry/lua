@@ -18,7 +18,7 @@ function Defer.setTimeout(interval, fn, ctx)
     start = getTime(),
     interval = interval,
     fn = fn,
-    ctx = ctx
+    ctx = ctx,
   }
 end
 
@@ -107,11 +107,11 @@ local function requestUid()
     0x30,
     0x01,
     MSP_ELRS_RXTX_CONFIG,
-    ELRS_RXTX_SUBCMD_UID
+    ELRS_RXTX_SUBCMD_UID,
   })
 
   -- Retry if no response
-   Defer.setTimeout(50, requestUid)
+  Defer.setTimeout(50, requestUid)
 end
 
 local function sendBindphrase()
@@ -126,16 +126,17 @@ local function sendBindphrase()
     0x30,
     0x01 + #bindPhrase,
     MSP_ELRS_RXTX_CONFIG,
-    ELRS_RXTX_SUBCMD_BIND_PHRASE }
+    ELRS_RXTX_SUBCMD_BIND_PHRASE,
+  }
 
   -- append the phrase as bytes
   for i = 1, #bindPhrase do data[#data+1] = string.byte(bindPhrase, i) end
 
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
 
-   History.add(bindPhrase)
+  History.add(bindPhrase)
   -- refresh the UID in 1000ms
-   Defer.setTimeout(100, requestUid)
+  Defer.setTimeout(100, requestUid)
 end
 
 local rebuildUi
@@ -150,7 +151,7 @@ local function history_press(id)
   rebuildUi()
 end
 
-rebuildUi = function ()
+rebuildUi = function()
   lvgl.clear()
 
   local pg = lvgl.page({
@@ -169,21 +170,21 @@ rebuildUi = function ()
     title = "Bind Phrase",
     children = {
       {
-        type  = lvgl.BOX,
-        x     = 120,
-        flexFlow    = lvgl.FLOW_ROW,
-        flexPad     = lvgl.PAD_MEDIUM,
+        type = lvgl.BOX,
+        x = 120,
+        flexFlow = lvgl.FLOW_ROW,
+        flexPad = lvgl.PAD_MEDIUM,
         children = {
           {
-            type   = lvgl.TEXT_EDIT,
-            w      = 240,
-            value  = bindPhrase,
+            type = lvgl.TEXT_EDIT,
+            w = 240,
+            value = bindPhrase,
             length = 52, -- packet is only so big and can't span
             set = function(v) bindPhrase = v end,
           },
           {
-            type  = lvgl.BUTTON,
-            text  = "Set",
+            type = lvgl.BUTTON,
+            text = "Set",
             press = sendBindphrase,
           },
         },
@@ -198,20 +199,20 @@ rebuildUi = function ()
     children = {
       {
         type  = lvgl.BOX,
-        x     = 120,
-        flexFlow    = lvgl.FLOW_ROW,
-        flexPad     = lvgl.PAD_MEDIUM,
+        x = 120,
+        flexFlow = lvgl.FLOW_ROW,
+        flexPad = lvgl.PAD_MEDIUM,
         children = {
           {
-            type   = lvgl.CHOICE,
-            title  = "Select Target",
+            type = lvgl.CHOICE,
+            title = "Select Target",
             values = {"Transmitter", "Receiver"},
-            get    = function() return targetIdx end,
-            set    = function(n) targetIdx = n end,
+            get = function() return targetIdx end,
+            set = function(n) targetIdx = n end,
           },
           {
-            type  = lvgl.BUTTON,
-            text  = "Request UID",
+            type = lvgl.BUTTON,
+            text = "Request UID",
             press = requestUid,
           },
         },
@@ -222,9 +223,9 @@ rebuildUi = function ()
   -- ***** Bind Phrase History *****
   local row = pg:box({
     w = lvgl.PERCENT_SIZE + 100, y = 82,
-    flexFlow    = lvgl.FLOW_COLUMN,
-    flexPad     = lvgl.PAD_MEDIUM,
-    visible     = function () return #History.vals end,
+    flexFlow = lvgl.FLOW_COLUMN,
+    flexPad = lvgl.PAD_MEDIUM,
+    visible = function () return #History.vals end,
   })
   row:label({text = "Bind Phrase History"})
    for i = 1, History.MAX do
@@ -244,7 +245,7 @@ local function init()
   rebuildUi()
 
   CRSF:registerHandler(CRSF.CONST.FRAMETYPE_MSP_RESP, onMspResponse)
-   Defer.setTimeout(1, requestUid)
+  Defer.setTimeout(1, requestUid)
 end
 
 local function run(event, touchState)
