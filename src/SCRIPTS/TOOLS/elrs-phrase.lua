@@ -139,6 +139,12 @@ local function sendBindphrase()
   Defer.setTimeout(100, requestUid)
 end
 
+function sendBindTx()
+  uidText = "Sending bind command..."
+  CRSF.sendBind(ADDRESS_TX_MODULE)
+  Defer.setTimeout(100, function () uidText = "Sent" end)
+end
+
 local rebuildUi
 local function history_text(id)
   return History.vals[id]
@@ -186,6 +192,7 @@ rebuildUi = function()
             type = lvgl.BUTTON,
             text = "Set",
             press = sendBindphrase,
+            active = function () return targetIdx == 1 or CRSF.isConnected end,
           },
         },
       },
@@ -198,7 +205,7 @@ rebuildUi = function()
     title = "Target",
     children = {
       {
-        type  = lvgl.BOX,
+        type = lvgl.BOX,
         x = 120,
         flexFlow = lvgl.FLOW_ROW,
         flexPad = lvgl.PAD_MEDIUM,
@@ -214,8 +221,30 @@ rebuildUi = function()
             type = lvgl.BUTTON,
             text = "Request UID",
             press = requestUid,
+            active = function () return targetIdx == 1 or CRSF.isConnected end,
           },
         },
+      },
+    },
+  })
+
+  -- ***** Show Bind button if RX target selected and no RX connected *****
+  pg:box({
+    w = lvgl.PERCENT_SIZE + 100, y = 82,
+    flexFlow = lvgl.FLOW_ROW,
+    flexPad = lvgl.PAD_MEDIUM,
+    align = LEFT,
+    visible = function () return targetIdx == 2 and not CRSF.isConnected end,
+    children = {
+      {
+        type = lvgl.LABEL,
+        w = 4+120+240,
+        text = " No receiver connected.\n Use Bind to set bindphrase if RX in bind mode",
+      },
+      {
+        type = lvgl.BUTTON,
+        text = "Bind",
+        press = sendBindTx,
       },
     },
   })
@@ -225,7 +254,8 @@ rebuildUi = function()
     w = lvgl.PERCENT_SIZE + 100, y = 82,
     flexFlow = lvgl.FLOW_COLUMN,
     flexPad = lvgl.PAD_MEDIUM,
-    visible = function () return #History.vals end,
+    -- visible if there is history and TX selected or RX selected and isConnected
+    visible = function () return #History.vals and targetIdx == 1 or CRSF.isConnected end,
   })
   row:label({text = "Bind Phrase History"})
    for i = 1, History.MAX do

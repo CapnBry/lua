@@ -35,6 +35,7 @@ CRSF.CONST = {
   FRAMETYPE_PARAMETER_READ = 0x2C,
   FRAMETYPE_PARAMETER_WRITE = 0x2D,
   FRAMETYPE_ELRS_STATUS = 0x2E,
+  FRAMETYPE_COMMAND = 0x32,
   FRAMETYPE_MSP_REQ = 0x7A,
   FRAMETYPE_MSP_RESP = 0x7B,
   FRAMETYPE_MSP_WRITE = 0x7C,
@@ -62,6 +63,15 @@ CRSF.CONST = {
 
   -- Module type for model.getModule() check
   MODULE_TYPE_CROSSFIRE = 5,
+
+  -- FRAMETYPE_COMMAND subcommands
+  COMMAND = {
+    SUBCMD_RX = {
+      ID = 0x10,
+      -- CMDS
+      BIND = 0x01,
+    },
+  },
 }
 
 -- ============================================================================
@@ -73,6 +83,9 @@ CRSF._handlers = {}
 
 -- Device info cache (populated by built-in DEVICE_INFO handler)
 CRSF.deviceInfo = {}
+
+-- True if receiving telemetry, set by poll() so do call this before checking
+CRSF.isConnected = nil
 
 -- Telemetry state (populated by built-in ELRS_STATUS handler)
 CRSF.hasTelemetry = false
@@ -202,6 +215,9 @@ function CRSF:poll()
   end
   self._lastPollTick = now
 
+  local LQ = getValue('RQly')
+  self.isConnected = LQ and LQ > 0 or nil
+
   while true do
     local command, data = CRSF.pop()
     if command == nil then
@@ -258,6 +274,14 @@ function CRSF:requestElrsStatus()
   end
   self._lastStatusPoll = now
   CRSF.push(CRSF.CONST.FRAMETYPE_PARAMETER_WRITE, { CRSF.CONST.ADDRESS_TX_MODULE, CRSF.CONST.ADDRESS_HANDSET, 0, 0 })
+end
+
+-- Send a BIND command to the dest ADDR (default TX)
+-- Sending to RX unbinds if connected, sending to TX transmits a packet to bind a waiting RX
+function CRSF.sendBind(dest)
+  CRSF.push(CRSF.CONST.FRAMETYPE_COMMAND,
+    { dest or CRSF.CONST.ADDRESS_TX_MODULE, CRSF.CONST.ADDRESS_HANDSET, CRSF.CONST.COMMAND.SUBCMD_RX.ID, CRSF.CONST.COMMAND.SUBCMD_RX.BIND}
+  )
 end
 
 -- ============================================================================
