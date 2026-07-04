@@ -150,7 +150,13 @@ end
 
 local function sendBindTx()
   uidText = "Sending bind command..."
-  CRSF.sendBind(ADDRESS_TX_MODULE)
+  CRSF.sendBind(CRSF.CONST.ADDRESS_TX_MODULE)
+  Defer.setTimeout(100, function () uidText = "Sent" end)
+end
+
+local function sendBindRx()
+  uidText = "Sending unbind to RX..."
+  CRSF.sendBind(CRSF.CONST.ADDRESS_RX)
   Defer.setTimeout(100, function () uidText = "Sent" end)
 end
 
@@ -232,6 +238,15 @@ rebuildUi = function()
             text = "Request UID",
             press = requestUid,
             active = isTargetReachable,
+          },
+          {
+            type = lvgl.BUTTON,
+            text = "Unbind",
+            press = sendBindRx,
+            -- Visible if RX
+            visible = function () return targetIdx == 2 end,
+            -- Active if RX and is connected
+            active = function () return targetIdx == 2 and CRSF.isConnected end,
           },
         },
       },
