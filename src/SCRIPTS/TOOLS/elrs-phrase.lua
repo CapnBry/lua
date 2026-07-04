@@ -98,7 +98,16 @@ local function onMspResponse(data)
   end
 end
 
+local function isTargetReachable()
+   return targetIdx == 1 or CRSF.isConnected
+end
+
 local function requestUid()
+  if not isTargetReachable() then
+    uidText = "Idle"
+    return
+  end
+
   uidText = "Updating..."
 
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_REQ, {
@@ -139,7 +148,7 @@ local function sendBindphrase()
   Defer.setTimeout(100, requestUid)
 end
 
-function sendBindTx()
+local function sendBindTx()
   uidText = "Sending bind command..."
   CRSF.sendBind(ADDRESS_TX_MODULE)
   Defer.setTimeout(100, function () uidText = "Sent" end)
@@ -187,12 +196,13 @@ rebuildUi = function()
             value = bindPhrase,
             length = 52, -- packet is only so big and can't span
             set = function(v) bindPhrase = v end,
+            active = isTargetReachable,
           },
           {
             type = lvgl.BUTTON,
             text = "Set",
             press = sendBindphrase,
-            active = function () return targetIdx == 1 or CRSF.isConnected end,
+            active = isTargetReachable,
           },
         },
       },
@@ -221,7 +231,7 @@ rebuildUi = function()
             type = lvgl.BUTTON,
             text = "Request UID",
             press = requestUid,
-            active = function () return targetIdx == 1 or CRSF.isConnected end,
+            active = isTargetReachable,
           },
         },
       },
@@ -255,7 +265,7 @@ rebuildUi = function()
     flexFlow = lvgl.FLOW_COLUMN,
     flexPad = lvgl.PAD_MEDIUM,
     -- visible if there is history and TX selected or RX selected and isConnected
-    visible = function () return #History.vals and targetIdx == 1 or CRSF.isConnected end,
+    visible = function () return #History.vals and isTargetReachable() end,
   })
   row:label({text = "Bind Phrase History"})
    for i = 1, History.MAX do
