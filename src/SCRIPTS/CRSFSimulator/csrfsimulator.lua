@@ -481,8 +481,8 @@ local txDevice = {
       id = 11,
       parent = 10,
       type = CRSF.TEXT_SELECTION,
-      name = "Band",
-      options = "Off;A;B;E;F;R;L",
+      name = "Band/Enable",
+      options = "Disabled;A;B;E;F;R;L",
       value = 5,
       units = "",
     },
@@ -861,7 +861,7 @@ local function updateFolderNames(device)
   if vtxFolder and vtxBand then
     local bandVal = vtxBand.value or 0
     if bandVal == 0 then
-      -- Band is "Off" -> use static name (no dynamic suffix)
+      -- Band is "Disabled" -> use static name (no dynamic suffix)
       vtxFolder.dynName = nil
     else
       local bandLabel = getOptionLabel(vtxBand.options, bandVal)

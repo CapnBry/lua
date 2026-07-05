@@ -255,7 +255,7 @@ function Protocol.onSettingsEntry(data)
       Protocol.statusText = "VTX Admin not found"
     end
   elseif st == Protocol.STATE_DISCOVER_VTX then
-    if fieldName == "Band" then
+    if fieldName == "Band" or fieldName == "Band/Enable" then
       VTX.ids.band = fieldId
     elseif fieldName == "Channel" then
       VTX.ids.channel = fieldId
