@@ -40,7 +40,7 @@ end
 
 local History = {
   MAX = 5,
-  FNAME = "elrs-phrase.txt",
+  FNAME = "elrs-bind.txt",
   vals = {},
 }
 
