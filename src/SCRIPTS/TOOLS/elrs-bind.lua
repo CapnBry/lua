@@ -1,5 +1,4 @@
--- ELRS Config Tool (EdgeTX 2.11+ LVGL)
--- Requires useLvgl = true and a color radio
+-- TNS|ELRS Bind Manager|TNE
 
 local CRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")()
 
@@ -188,17 +187,17 @@ rebuildUi = function()
   -- ***** Bind Phrase label + text edit + Set button *****
   tbox:setting({
     w = lvgl.PERCENT_SIZE + 100,
-    title = "Bind Phrase",
+    title = "Bind phrase",
     children = {
       {
         type = lvgl.BOX,
-        x = 120,
+        x = 120 * lvgl.LCD_SCALE,
         flexFlow = lvgl.FLOW_ROW,
         flexPad = lvgl.PAD_MEDIUM,
         children = {
           {
             type = lvgl.TEXT_EDIT,
-            w = 240,
+            w = 250 * lvgl.LCD_SCALE,
             value = bindPhrase,
             length = 52, -- packet is only so big and can't span
             set = function(v) bindPhrase = v end,
@@ -222,7 +221,7 @@ rebuildUi = function()
     children = {
       {
         type = lvgl.BOX,
-        x = 120,
+        x = 120 * lvgl.LCD_SCALE,
         flexFlow = lvgl.FLOW_ROW,
         flexPad = lvgl.PAD_MEDIUM,
         children = {
@@ -255,7 +254,7 @@ rebuildUi = function()
 
   -- ***** Show Bind button if RX target selected and no RX connected *****
   pg:box({
-    w = lvgl.PERCENT_SIZE + 100, y = 82,
+    w = lvgl.PERCENT_SIZE + 100, y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
     flexFlow = lvgl.FLOW_ROW,
     flexPad = lvgl.PAD_MEDIUM,
     align = LEFT,
@@ -263,7 +262,7 @@ rebuildUi = function()
     children = {
       {
         type = lvgl.LABEL,
-        w = 4+120+240,
+        w = 4 + lvgl.LCD_SCALE * (120 + 250),
         text = " No receiver connected.\n Use Bind to set bindphrase if RX in bind mode",
       },
       {
@@ -276,7 +275,7 @@ rebuildUi = function()
 
   -- ***** Bind Phrase History *****
   local row = pg:box({
-    w = lvgl.PERCENT_SIZE + 100, y = 82,
+    w = lvgl.PERCENT_SIZE + 100, y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
     flexFlow = lvgl.FLOW_COLUMN,
     flexPad = lvgl.PAD_MEDIUM,
     -- visible if there is history and TX selected or RX selected and isConnected
