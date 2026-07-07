@@ -215,7 +215,7 @@ function CRSF:poll()
   end
   self._lastPollTick = now
 
-  local LQ = getValue('RQly')
+  local LQ = getValue("RQly")
   self.isConnected = LQ and LQ > 0 or nil
 
   while true do
@@ -279,9 +279,12 @@ end
 -- Send a BIND command to the dest ADDR (default TX)
 -- Sending to RX unbinds if connected, sending to TX transmits a packet to bind a waiting RX
 function CRSF.sendBind(dest)
-  CRSF.push(CRSF.CONST.FRAMETYPE_COMMAND,
-    { dest or CRSF.CONST.ADDRESS_TX_MODULE, CRSF.CONST.ADDRESS_HANDSET, CRSF.CONST.COMMAND.SUBCMD_RX.ID, CRSF.CONST.COMMAND.SUBCMD_RX.BIND}
-  )
+  CRSF.push(CRSF.CONST.FRAMETYPE_COMMAND, {
+    dest or CRSF.CONST.ADDRESS_TX_MODULE,
+    CRSF.CONST.ADDRESS_HANDSET,
+    CRSF.CONST.COMMAND.SUBCMD_RX.ID,
+    CRSF.CONST.COMMAND.SUBCMD_RX.BIND,
+  })
 end
 
 -- ============================================================================

@@ -2,9 +2,9 @@
 
 local CRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")()
 
-local targetIdx   = 1                 -- 1 = Transmitter, 2 = Receiver
-local bindPhrase  = ""
-local uidText     = ""
+local targetIdx = 1 -- 1 = Transmitter, 2 = Receiver
+local bindPhrase = ""
+local uidText = ""
 
 local MSP_ELRS_RXTX_CONFIG = 45
 local ELRS_RXTX_SUBCMD_UID = 0
@@ -26,7 +26,9 @@ function Defer.clear()
 end
 
 function Defer.poll()
-  if Defer._deferCb == nil then return end
+  if Defer._deferCb == nil then
+    return
+  end
 
   if getTime() - Defer._deferCb.start < Defer._deferCb.interval then
     return
@@ -45,7 +47,9 @@ local History = {
 }
 
 function History.add(s)
-  if s == nil or s == "" then return end
+  if s == nil or s == "" then
+    return
+  end
 
   -- remove this value from the history list if already there
   for idx = #History.vals, 1, -1 do
@@ -61,20 +65,26 @@ function History.add(s)
   end
 
   local f = io.open(History.FNAME, "w")
-  if f == nil then return end
-  io.write(f, table.concat(History.vals, '\n'))
+  if f == nil then
+    return
+  end
+  io.write(f, table.concat(History.vals, "\n"))
   io.close(f)
 end
 
 function History.load()
   local f = io.open(History.FNAME, "r")
-  if f == nil then return end
+  if f == nil then
+    return
+  end
 
   History.vals = {}
   local all = io.read(f, 64 * History.MAX)
   io.close(f)
 
-  if all == nil or all == "" then return end
+  if all == nil or all == "" then
+    return
+  end
 
   for line in string.gmatch(all, "[^\n]+") do
     History.vals[#History.vals + 1] = line
@@ -84,21 +94,23 @@ function History.load()
 end
 
 local function onMspResponse(data)
-  if data[1] == CRSF.CONST.ADDRESS_RADIO_TRANSMITTER
-    and (data[2] == CRSF.CONST.ADDRESS_RX or data[2] == CRSF.CONST.ADDRESS_TX_MODULE) then
+  if
+    data[1] == CRSF.CONST.ADDRESS_RADIO_TRANSMITTER
+    and (data[2] == CRSF.CONST.ADDRESS_RX or data[2] == CRSF.CONST.ADDRESS_TX_MODULE)
+  then
     local mspCmd = data[5]
 
     if mspCmd == MSP_ELRS_RXTX_CONFIG and data[6] == ELRS_RXTX_SUBCMD_UID then
       Defer.clear()
       local rxTx = (data[2] == CRSF.CONST.ADDRESS_RX) and "RX" or "TX"
-      uidText = string.format("%s: %d, %d, %d, %d, %d, %d",
-          rxTx, data[7], data[8], data[9], data[10], data[11], data[12])
+      uidText =
+        string.format("%s: %d, %d, %d, %d, %d, %d", rxTx, data[7], data[8], data[9], data[10], data[11], data[12])
     end
   end
 end
 
 local function isTargetReachable()
-   return targetIdx == 1 or CRSF.isConnected
+  return targetIdx == 1 or CRSF.isConnected
 end
 
 local function requestUid()
@@ -123,7 +135,9 @@ local function requestUid()
 end
 
 local function sendBindphrase()
-  if bindPhrase == "" then return end
+  if bindPhrase == "" then
+    return
+  end
 
   local rxTx = (targetIdx == 1) and "Transmitter" or "Receiver"
   uidText = "Setting " .. rxTx .. "..."
@@ -138,7 +152,9 @@ local function sendBindphrase()
   }
 
   -- append the phrase as bytes
-  for i = 1, #bindPhrase do data[#data+1] = string.byte(bindPhrase, i) end
+  for i = 1, #bindPhrase do
+    data[#data + 1] = string.byte(bindPhrase, i)
+  end
 
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
 
@@ -150,13 +166,17 @@ end
 local function sendBindTx()
   uidText = "Sending bind command..."
   CRSF.sendBind(CRSF.CONST.ADDRESS_TX_MODULE)
-  Defer.setTimeout(100, function () uidText = "Sent" end)
+  Defer.setTimeout(100, function()
+    uidText = "Sent"
+  end)
 end
 
 local function sendBindRx()
   uidText = "Sending unbind to RX..."
   CRSF.sendBind(CRSF.CONST.ADDRESS_RX)
-  Defer.setTimeout(100, function () uidText = "Sent" end)
+  Defer.setTimeout(100, function()
+    uidText = "Sent"
+  end)
 end
 
 local rebuildUi
@@ -175,8 +195,10 @@ rebuildUi = function()
   lvgl.clear()
 
   local pg = lvgl.page({
-    title    = "ExpressLRS Bind Phrase",
-    subtitle = function() return uidText end,
+    title = "ExpressLRS Bind Phrase",
+    subtitle = function()
+      return uidText
+    end,
   })
 
   local tbox = pg:box({
@@ -200,14 +222,18 @@ rebuildUi = function()
             w = 250 * lvgl.LCD_SCALE,
             value = bindPhrase,
             length = 52, -- packet is only so big and can't span
-            set = function(v) bindPhrase = v end,
+            set = function(v)
+              bindPhrase = v
+            end,
             active = isTargetReachable,
           },
           {
             type = lvgl.BUTTON,
             text = "Set",
             press = sendBindphrase,
-            active = isTargetReachable,
+            active = function()
+              return isTargetReachable() and bindPhrase ~= ""
+            end,
           },
         },
       },
@@ -228,9 +254,13 @@ rebuildUi = function()
           {
             type = lvgl.CHOICE,
             title = "Select Target",
-            values = {"Transmitter", "Receiver"},
-            get = function() return targetIdx end,
-            set = function(n) targetIdx = n end,
+            values = { "Transmitter", "Receiver" },
+            get = function()
+              return targetIdx
+            end,
+            set = function(n)
+              targetIdx = n
+            end,
           },
           {
             type = lvgl.BUTTON,
@@ -243,9 +273,13 @@ rebuildUi = function()
             text = "Unbind",
             press = sendBindRx,
             -- Visible if RX
-            visible = function () return targetIdx == 2 end,
+            visible = function()
+              return targetIdx == 2
+            end,
             -- Active if RX and is connected
-            active = function () return targetIdx == 2 and CRSF.isConnected end,
+            active = function()
+              return targetIdx == 2 and CRSF.isConnected
+            end,
           },
         },
       },
@@ -254,11 +288,14 @@ rebuildUi = function()
 
   -- ***** Show Bind button if RX target selected and no RX connected *****
   pg:box({
-    w = lvgl.PERCENT_SIZE + 100, y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
+    w = lvgl.PERCENT_SIZE + 100,
+    y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
     flexFlow = lvgl.FLOW_ROW,
     flexPad = lvgl.PAD_MEDIUM,
     align = LEFT,
-    visible = function () return targetIdx == 2 and not CRSF.isConnected end,
+    visible = function()
+      return targetIdx == 2 and not CRSF.isConnected
+    end,
     children = {
       {
         type = lvgl.LABEL,
@@ -275,25 +312,36 @@ rebuildUi = function()
 
   -- ***** Bind Phrase History *****
   local row = pg:box({
-    w = lvgl.PERCENT_SIZE + 100, y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
+    w = lvgl.PERCENT_SIZE + 100,
+    y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
     flexFlow = lvgl.FLOW_COLUMN,
     flexPad = lvgl.PAD_MEDIUM,
     -- visible if there is history and TX selected or RX selected and isConnected
-    visible = function () return #History.vals and isTargetReachable() end,
+    visible = function()
+      return #History.vals and isTargetReachable()
+    end,
   })
-  row:label({text = "Bind Phrase History"})
-   for i = 1, History.MAX do
-      row:button({
-        w = lvgl.PERCENT_SIZE + 80,
-        text = function () return history_text(i) end,
-        visible = function () return history_visible(i) end,
-        press = function () return history_press(i) end,
-      })
+  row:label({ text = "Bind Phrase History" })
+  for i = 1, History.MAX do
+    row:button({
+      w = lvgl.PERCENT_SIZE + 80,
+      text = function()
+        return history_text(i)
+      end,
+      visible = function()
+        return history_visible(i)
+      end,
+      press = function()
+        return history_press(i)
+      end,
+    })
   end
 end
 
 local function init()
-  if lvgl == nil then return end
+  if lvgl == nil then
+    return
+  end
 
   bindPhrase = History.load() or ""
   rebuildUi()
