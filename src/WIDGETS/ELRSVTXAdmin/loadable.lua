@@ -190,16 +190,13 @@ end
 -- ============================================================================
 
 function Protocol.sendParameterRead(fieldId)
-  crsf.push(
-    crsf.CONST.FRAMETYPE_PARAMETER_READ,
-    { crsf.CONST.ADDRESS_TX_MODULE, crsf.CONST.ADDRESS_HANDSET, fieldId, 0 }
-  )
+  crsf.push(crsf.CONST.FRAMETYPE_PARAMETER_READ, { crsf.CONST.ADDRESS_TX, crsf.CONST.ADDRESS_HANDSET_ELRS, fieldId, 0 })
 end
 
 function Protocol.sendParameterWrite(fieldId, value)
   crsf.push(
     crsf.CONST.FRAMETYPE_PARAMETER_WRITE,
-    { crsf.CONST.ADDRESS_TX_MODULE, crsf.CONST.ADDRESS_HANDSET, fieldId, value }
+    { crsf.CONST.ADDRESS_TX, crsf.CONST.ADDRESS_HANDSET_ELRS, fieldId, value }
   )
 end
 
@@ -213,7 +210,7 @@ end
 -- ============================================================================
 
 function Protocol.onSettingsEntry(data)
-  if data[2] ~= crsf.CONST.ADDRESS_TX_MODULE then
+  if data[2] ~= crsf.CONST.ADDRESS_TX then
     return
   end
 

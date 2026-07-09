@@ -40,10 +40,10 @@ local Protocol = {
 
     -- Addresses
     ADDRESS_BROADCAST = 0x00,
-    ADDRESS_RADIO_TRANSMITTER = 0xEA,
-    ADDRESS_CRSF_RECEIVER = 0xEC,
-    ADDRESS_CRSF_TRANSMITTER = 0xEE,
-    ADDRESS_ELRS_LUA = 0xEF,
+    ADDRESS_HANDSET = 0xEA, -- EdgeTX's official handset address
+    ADDRESS_RX = 0xEC,
+    ADDRESS_TX = 0xEE,
+    ADDRESS_HANDSET_ELRS = 0xEF, -- ELRS-custom Lua device address, not standard CRSF
 
     -- ELRS identification
     ELRS_SERIAL_ID = 0x454C5253,
@@ -67,9 +67,9 @@ local Protocol = {
   -- Handlers dispatch table (populated after function definitions)
   handlers = {},
 
-  -- Device identity (used in every CRSF frame) -- defaults to TX module + ELRS Lua
-  deviceId = 0xEE, -- ADDRESS_CRSF_TRANSMITTER (can't self-ref before table is created)
-  handsetId = 0xEF, -- ADDRESS_ELRS_LUA
+  -- Device identity (used in every CRSF frame)
+  deviceId = 0xEE, -- ADDRESS_TX (can't self-ref before table is created)
+  handsetId = 0xEF, -- ADDRESS_HANDSET_ELRS
   deviceName = nil,
   deviceIsELRS_TX = nil,
 
@@ -109,8 +109,8 @@ local Protocol = {
 -- ============================================================================
 
 function Protocol.reset()
-  Protocol.deviceId = Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER
-  Protocol.handsetId = Protocol.CRSF.ADDRESS_ELRS_LUA
+  Protocol.deviceId = Protocol.CRSF.ADDRESS_TX
+  Protocol.handsetId = Protocol.CRSF.ADDRESS_HANDSET_ELRS
   Protocol.deviceName = nil
   Protocol.deviceIsELRS_TX = nil
 
@@ -151,10 +151,7 @@ function Protocol.push(command, data)
 end
 
 function Protocol.pingDevices()
-  Protocol.push(
-    Protocol.CRSF.FRAMETYPE_DEVICE_PING,
-    { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER }
-  )
+  Protocol.push(Protocol.CRSF.FRAMETYPE_DEVICE_PING, { Protocol.CRSF.ADDRESS_BROADCAST, Protocol.CRSF.ADDRESS_HANDSET })
 end
 
 -- Check if telemetry is being received from the RX (elrsFlags bit 1)
@@ -201,9 +198,8 @@ function Protocol.setDevice(device)
   Protocol.elrsFlags = 0
   Protocol.deviceName = device.name
   Protocol.fieldsCount = device.fieldCount
-  Protocol.deviceIsELRS_TX = device.isElrs and device.id == Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER or nil
-  Protocol.handsetId = Protocol.deviceIsELRS_TX and Protocol.CRSF.ADDRESS_ELRS_LUA
-    or Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER
+  Protocol.deviceIsELRS_TX = device.isElrs and device.id == Protocol.CRSF.ADDRESS_TX or nil
+  Protocol.handsetId = Protocol.deviceIsELRS_TX and Protocol.CRSF.ADDRESS_HANDSET_ELRS or Protocol.CRSF.ADDRESS_HANDSET
 
   Protocol.allocateFields()
   Protocol.reloadAllFields()
@@ -707,7 +703,7 @@ function Protocol.parseParameterInfoMessage(data)
     Protocol.fieldChunk = 0
     Protocol.fieldData = nil
 
-    return Protocol.deviceId ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER or #Protocol.loadQueue == 0
+    return Protocol.deviceId ~= Protocol.CRSF.ADDRESS_TX or #Protocol.loadQueue == 0
   end
 end
 
@@ -726,7 +722,7 @@ function Protocol.parseElrsInfoMessage(data)
 end
 
 function Protocol.parseElrsV1Message(data)
-  if (data[1] ~= Protocol.CRSF.ADDRESS_RADIO_TRANSMITTER) or (data[2] ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER) then
+  if (data[1] ~= Protocol.CRSF.ADDRESS_HANDSET) or (data[2] ~= Protocol.CRSF.ADDRESS_TX) then
     return
   end
   Protocol.elrsV1Detected = true

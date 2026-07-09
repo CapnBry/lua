@@ -50,10 +50,10 @@ local CRSF = {
 
   -- Addresses
   ADDRESS_BROADCAST = 0x00,
-  ADDRESS_RADIO_TRANSMITTER = 0xEA,
-  ADDRESS_CRSF_RECEIVER = 0xEC,
-  ADDRESS_CRSF_TRANSMITTER = 0xEE,
-  ADDRESS_ELRS_LUA = 0xEF,
+  ADDRESS_HANDSET = 0xEA, -- EdgeTX's official handset address
+  ADDRESS_RX = 0xEC,
+  ADDRESS_TX = 0xEE,
+  ADDRESS_HANDSET_ELRS = 0xEF, -- ELRS-custom Lua device address, not standard CRSF
 
   -- Field types0
   UINT8 = 0,
@@ -226,11 +226,11 @@ end
 
 --- Encode a DEVICE_INFO response packet (frame type 0x29)
 -- @param device  table with: id, name, serialNo, hwVer, swVer, fieldCount
--- @param destAddr  destination address (usually ADDRESS_RADIO_TRANSMITTER)
+-- @param destAddr  destination address (usually ADDRESS_HANDSET)
 -- @return data table suitable for queuePush(FRAMETYPE_DEVICE_INFO, data)
 local function encodeDeviceInfo(device, destAddr)
   local data = {}
-  data[1] = destAddr or CRSF.ADDRESS_RADIO_TRANSMITTER
+  data[1] = destAddr or CRSF.ADDRESS_HANDSET
   data[2] = device.id
   -- Device name (null-terminated)
   appendString(data, device.name)
@@ -256,7 +256,7 @@ end
 -- @return data table suitable for queuePush(FRAMETYPE_PARAMETER_SETTINGS_ENTRY, data)
 local function encodeParameterEntry(device, param, _chunk, destAddr)
   local data = {}
-  data[1] = destAddr or CRSF.ADDRESS_RADIO_TRANSMITTER
+  data[1] = destAddr or CRSF.ADDRESS_HANDSET
   data[2] = device.id
   data[3] = param.id -- Field ID
   data[4] = 0 -- Chunks remaining (0 = single chunk)
@@ -375,7 +375,7 @@ end
 -- @return data table
 local function encodeElrsStatus(deviceId, destAddr, badPkts, goodPkts, flags, flagsInfo)
   local data = {}
-  data[1] = destAddr or CRSF.ADDRESS_RADIO_TRANSMITTER
+  data[1] = destAddr or CRSF.ADDRESS_HANDSET
   data[2] = deviceId
   data[3] = badPkts or 0
   -- Good packets as uint16 BE
@@ -392,7 +392,7 @@ end
 -- ============================================================================
 
 local txDevice = {
-  id = CRSF.ADDRESS_CRSF_TRANSMITTER,
+  id = CRSF.ADDRESS_TX,
   name = "TX16S MK3",
   serialNo = CRSF.ELRS_SERIAL_ID,
   hwVer = 0,
@@ -597,7 +597,7 @@ local txDevice = {
 -- ============================================================================
 
 local rxDevice = {
-  id = CRSF.ADDRESS_CRSF_RECEIVER,
+  id = CRSF.ADDRESS_RX,
   name = "ELRS 2400RX",
   serialNo = CRSF.ELRS_SERIAL_ID,
   hwVer = 0,
@@ -1118,7 +1118,7 @@ local function mockPush(command, data)
   end
 
   if command == CRSF.FRAMETYPE_DEVICE_PING then
-    local destAddr = data[2] or CRSF.ADDRESS_RADIO_TRANSMITTER
+    local destAddr = data[2] or CRSF.ADDRESS_HANDSET
 
     -- TX module responds immediately (local to handset)
     queuePush(CRSF.FRAMETYPE_DEVICE_INFO, encodeDeviceInfo(txDevice, destAddr))
@@ -1135,7 +1135,7 @@ local function mockPush(command, data)
     local deviceId = data[1]
     local fieldId = data[3]
     local chunk = data[4] or 0
-    local destAddr = data[2] or CRSF.ADDRESS_RADIO_TRANSMITTER
+    local destAddr = data[2] or CRSF.ADDRESS_HANDSET
 
     local device = findDeviceByAddr(deviceId)
     if device then
@@ -1180,7 +1180,7 @@ local function mockPush(command, data)
     if fieldId == 0 then
       local flags = getElrsFlags()
       local flagsInfo = getElrsFlagsInfo()
-      local destAddr = data[2] or CRSF.ADDRESS_RADIO_TRANSMITTER
+      local destAddr = data[2] or CRSF.ADDRESS_HANDSET
       queuePush(CRSF.FRAMETYPE_ELRS_STATUS, encodeElrsStatus(deviceId, destAddr, 0, 250, flags, flagsInfo))
       return true
     end
@@ -1194,7 +1194,7 @@ local function mockPush(command, data)
           -- Command: handle state machine
           handleCommandWrite(device, param, writeValue)
           -- Queue the updated parameter entry as response
-          local destAddr = data[2] or CRSF.ADDRESS_RADIO_TRANSMITTER
+          local destAddr = data[2] or CRSF.ADDRESS_HANDSET
           queuePush(CRSF.FRAMETYPE_PARAMETER_SETTINGS_ENTRY, encodeParameterEntry(device, param, 0, destAddr))
         else
           -- Value write: decode based on field type
@@ -1235,7 +1235,7 @@ local function mockPush(command, data)
           -- Output Mapping per-channel config: mimic firmware behavior
           -- where changing Output Ch loads sibling values from per-channel config,
           -- and editing siblings saves back to the current channel's config.
-          if device.id == CRSF.ADDRESS_CRSF_RECEIVER then
+          if device.id == CRSF.ADDRESS_RX then
             if param.id == 9 then
               -- Output Ch changed: load config for the selected channel
               local cfg = pwmChannelConfig[param.value]
