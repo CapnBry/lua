@@ -2,7 +2,8 @@
 
 local CRSF = loadScript("/SCRIPTS/ELRS/crsf.lua")()
 
-local targetIdx = 1 -- 1 = Transmitter, 2 = Receiver
+local targetIdx = 1 -- 1 = Transmitter, 2 = Receiver, 3 = Both
+local targetBothStep = nil -- If setting Both RX and TX, state of change
 local bindPhrase = ""
 local uidText = ""
 
@@ -119,7 +120,11 @@ local function onMspResponse(data)
 end
 
 local function isTargetReachable()
-  return targetIdx == 1 or CRSF.isConnected
+  return targetIdx == 1 or (targetIdx == 2 and CRSF.isConnected)
+end
+
+local function isTargetReachableOrBoth()
+  return isTargetReachable() or targetIdx == 3
 end
 
 local function requestUid()
@@ -148,11 +153,28 @@ local function sendBindphrase()
     return
   end
 
-  local rxTx = (targetIdx == 1) and "Transmitter" or "Receiver"
-  uidText = "Setting " .. rxTx .. "..."
+  -- BothStep state machine
+  if targetIdx == 3 then
+    if targetBothStep == nil then
+      -- Send to RX
+      targetBothStep = 2
+    elseif targetBothStep == 2 then
+      -- Stop both, send to TX, and change the select to TX
+      targetBothStep = nil
+      targetIdx = 1
+    end
+  end
+
+  local effectiveTargetIdx = targetBothStep or targetIdx
+  if targetBothStep == nil then
+    local rxTx = (targetIdx == 1) and "Transmitter" or "Receiver"
+    uidText = "Setting " .. rxTx .. "..."
+  else
+    uidText = "Setting RX and disconnecting..."
+  end
 
   local data = {
-    (targetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX,
+    (effectiveTargetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX,
     CRSF.CONST.ADDRESS_RADIO_TRANSMITTER,
     0x30,
     0x01 + #bindPhrase,
@@ -168,8 +190,13 @@ local function sendBindphrase()
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
 
   History.add(bindPhrase)
-  -- refresh the UID in 1000ms
-  Defer.setTimeout(100, requestUid)
+  if targetBothStep == nil then
+    -- refresh the UID in 1000ms
+    Defer.setTimeout(100, requestUid)
+  else
+    -- Perform the next step of setBindphrase() for Both
+    Defer.setTimeout(100, sendBindphrase)
+  end
 end
 
 local function sendBindTx()
@@ -237,14 +264,14 @@ rebuildUi = function()
             set = function(v)
               bindPhrase = v
             end,
-            active = isTargetReachable,
+            active = isTargetReachableOrBoth,
           },
           {
             type = lvgl.BUTTON,
             text = "Set",
             press = sendBindphrase,
             active = function()
-              return isTargetReachable() and bindPhrase ~= ""
+              return isTargetReachableOrBoth() and bindPhrase ~= ""
             end,
           },
         },
@@ -266,7 +293,7 @@ rebuildUi = function()
           {
             type = lvgl.CHOICE,
             title = "Select Target",
-            values = { "Transmitter", "Receiver" },
+            values = { "Transmitter", "Receiver", "Both" },
             get = function()
               return targetIdx
             end,
@@ -330,7 +357,7 @@ rebuildUi = function()
     flexPad = 0,
     -- visible if there is history and TX selected or RX selected and isConnected
     visible = function()
-      return #History.vals > 0 and isTargetReachable()
+      return #History.vals > 0 and isTargetReachableOrBoth()
     end,
   })
   histSection:label({ text = "Bind Phrase History" })
