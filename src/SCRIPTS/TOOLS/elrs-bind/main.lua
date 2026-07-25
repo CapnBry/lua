@@ -43,7 +43,7 @@ end
 
 local History = {
   MAX = 5,
-  FNAME = "elrs-bind.txt",
+  FNAME = "history.txt",
   vals = {},
 }
 
