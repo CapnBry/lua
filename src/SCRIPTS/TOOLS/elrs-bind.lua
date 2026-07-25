@@ -64,6 +64,15 @@ function History.add(s)
     table.remove(History.vals)
   end
 
+  History.save()
+end
+
+function History.remove(idx)
+  table.remove(History.vals, idx)
+  History.save()
+end
+
+function History.save()
   local f = io.open(History.FNAME, "w")
   if f == nil then
     return
@@ -190,6 +199,9 @@ local function history_press(id)
   bindPhrase = History.vals[id]
   rebuildUi()
 end
+local function history_remove(id)
+  History.remove(id)
+end
 
 rebuildUi = function()
   lvgl.clear()
@@ -311,28 +323,42 @@ rebuildUi = function()
   })
 
   -- ***** Bind Phrase History *****
-  local row = pg:box({
+  local histSection = pg:box({
     w = lvgl.PERCENT_SIZE + 100,
     y = 2 * lvgl.UI_ELEMENT_HEIGHT + 4 * lvgl.PAD_MEDIUM,
     flexFlow = lvgl.FLOW_COLUMN,
-    flexPad = lvgl.PAD_MEDIUM,
+    flexPad = 0,
     -- visible if there is history and TX selected or RX selected and isConnected
     visible = function()
-      return #History.vals and isTargetReachable()
+      return #History.vals > 0 and isTargetReachable()
     end,
   })
-  row:label({ text = "Bind Phrase History" })
+  histSection:label({ text = "Bind Phrase History" })
   for i = 1, History.MAX do
-    row:button({
-      w = lvgl.PERCENT_SIZE + 80,
-      text = function()
-        return history_text(i)
-      end,
+    local row = histSection:box({
+      w = lvgl.PERCENT_SIZE + 100,
+      flexFlow = lvgl.FLOW_ROW,
+      flexPad = lvgl.PAD_SMALL,
       visible = function()
         return history_visible(i)
       end,
+    })
+    -- Button containing a history item with its value
+    row:button({
+      w = lvgl.PERCENT_SIZE + 80,
+      text = function()
+        return history_text(i) or ""
+      end,
       press = function()
         return history_press(i)
+      end,
+    })
+    -- Button X to delete an item
+    row:button({
+      text = "X",
+      textColor = COLOR_THEME_WARNING,
+      press = function()
+        return history_remove(i)
       end,
     })
   end
