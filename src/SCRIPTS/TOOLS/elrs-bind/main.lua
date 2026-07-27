@@ -420,7 +420,11 @@ rebuildUi = function()
       return #History.vals > 0 and isTargetReachableOrBoth()
     end,
   })
-  histSection:label({ text = "Bind Phrase History" })
+  histSection:label({
+    text = "Bind Phrase History",
+    w = lvgl.PERCENT_SIZE + 100,
+    align = CENTER,
+  })
   for i = 1, History.MAX do
     local row = histSection:box({
       w = lvgl.PERCENT_SIZE + 100,
