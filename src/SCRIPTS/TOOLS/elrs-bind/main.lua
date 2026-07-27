@@ -148,7 +148,81 @@ local function requestUid()
   Defer.setTimeout(50, requestUid)
 end
 
-local function sendBindphrase()
+local function isValidUidByte(s)
+    local n = tonumber(s)
+    -- Must be a number, an integer, and within 0..255 range
+    return n ~= nil and n == math.floor(n) and n >= 0 and n < 256
+end
+
+local function uidBytesFromText(text)
+    -- 1. If text is ONLY numbers, commas, and spaces
+    if string.match(text, "^[0-9, ]+$") then
+        local asArray = {}
+
+        -- 2. Split by comma and filter valid bytes (trimming whitespace)
+        for part in string.gmatch(text, "[^,]+") do
+            local trimmed = string.match(part, "^%s*(.-)%s*$")
+
+            if isValidUidByte(trimmed) then
+                asArray[#asArray + 1] = tonumber(trimmed)
+            else
+                return nil
+            end
+        end
+
+        -- 3. If between 4 and 6 valid bytes, left-pad with 0s up to 6
+        if #asArray >= 4 and #asArray <= 6 then
+            local padded = {}
+            local padCount = 6 - #asArray
+
+            -- Push leading zeroes
+            for i = 1, padCount do
+                padded[#padded + 1] = 0
+            end
+
+            -- Push existing bytes
+            for i = 1, #asArray do
+                padded[#padded + 1] = asArray[i]
+            end
+
+            return padded
+        end
+    end
+
+    return nil
+end
+
+local function sendBindinfoPacket(targetAddr)
+    -- Test if the string is a UID, and if so use the UID else use the string bindphrase
+  local uidBytes = uidBytesFromText(bindPhrase)
+  local mspPayloadLen = uidBytes and #uidBytes or #bindPhrase
+  local subcmd = uidBytes and ELRS_RXTX_SUBCMD_UID or ELRS_RXTX_SUBCMD_BIND_PHRASE
+
+  local data = {
+    targetAddr,
+    CRSF.CONST.ADDRESS_RADIO_TRANSMITTER,
+    0x30,
+    0x01 + mspPayloadLen,
+    MSP_ELRS_RXTX_CONFIG,
+    subcmd,
+  }
+
+  if uidBytes then
+    -- append the UID as bytes
+    for i = 1, #uidBytes do
+      data[#data + 1] = uidBytes[i]
+    end
+  else
+    -- append the phrase characters as bytes
+    for i = 1, #bindPhrase do
+      data[#data + 1] = string.byte(bindPhrase, i)
+    end
+  end
+
+  CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
+end
+
+local function requestSendBindphrase()
   if bindPhrase == "" then
     return
   end
@@ -173,21 +247,7 @@ local function sendBindphrase()
     uidText = "Setting RX and disconnecting..."
   end
 
-  local data = {
-    (effectiveTargetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX,
-    CRSF.CONST.ADDRESS_RADIO_TRANSMITTER,
-    0x30,
-    0x01 + #bindPhrase,
-    MSP_ELRS_RXTX_CONFIG,
-    ELRS_RXTX_SUBCMD_BIND_PHRASE,
-  }
-
-  -- append the phrase as bytes
-  for i = 1, #bindPhrase do
-    data[#data + 1] = string.byte(bindPhrase, i)
-  end
-
-  CRSF.push(CRSF.CONST.FRAMETYPE_MSP_WRITE, data)
+  sendBindinfoPacket((effectiveTargetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX)
 
   History.add(bindPhrase)
   if targetBothStep == nil then
@@ -195,7 +255,7 @@ local function sendBindphrase()
     Defer.setTimeout(100, requestUid)
   else
     -- Perform the next step of setBindphrase() for Both
-    Defer.setTimeout(100, sendBindphrase)
+    Defer.setTimeout(100, requestSendBindphrase)
   end
 end
 
@@ -269,7 +329,7 @@ rebuildUi = function()
           {
             type = lvgl.BUTTON,
             text = "Set",
-            press = sendBindphrase,
+            press = requestSendBindphrase,
             active = function()
               return isTargetReachableOrBoth() and bindPhrase ~= ""
             end,
