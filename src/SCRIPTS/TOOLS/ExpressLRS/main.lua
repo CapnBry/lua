@@ -81,8 +81,8 @@ end
 
 -- Reload at root: switch back to TX device or reload fields + ping.
 function App.reloadAtRoot()
-  if Protocol.deviceId ~= Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER then
-    local txDevice = Protocol.getDevice(Protocol.CRSF.ADDRESS_CRSF_TRANSMITTER)
+  if Protocol.deviceId ~= Protocol.CRSF.ADDRESS_TX then
+    local txDevice = Protocol.getDevice(Protocol.CRSF.ADDRESS_TX)
     if txDevice then
       App.loadDevice(txDevice)
     end

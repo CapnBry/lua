@@ -7,7 +7,7 @@ The package also includes two color-LCD widgets: the **ELRS Telemetry Widget** a
 ## Features
 
 - Configure packet rate, telemetry ratio, switch mode, model match, antenna mode, TX power, WiFi connectivity, and more
-- Compatible with **ExpressLRS v3.0+**
+- Compatible with **ExpressLRS v3.5.4+**
 
 ## Installation
 
@@ -88,5 +88,5 @@ See [docs/development.md](docs/development.md) for the tool's internal architect
 
 | Radio type | Firmware | ExpressLRS |
 |------------|----------|------------|
-| Black & white LCD | EdgeTX 2.11.6+, 2.12.1+, or 3.0+ | v3.0+ |
-| Color LCD | EdgeTX 2.11.6+, 2.12.1+, or 3.0+ | v3.0+ |
+| Black & white LCD | EdgeTX 2.11.6+, 2.12.1+, or 3.0+ | v3.5.4+ |
+| Color LCD | EdgeTX 2.11.6+, 2.12.1+, or 3.0+ | v3.5.4+ |

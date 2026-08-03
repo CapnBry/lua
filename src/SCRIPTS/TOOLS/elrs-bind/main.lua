@@ -105,8 +105,8 @@ end
 
 local function onMspResponse(data)
   if
-    data[1] == CRSF.CONST.ADDRESS_RADIO_TRANSMITTER
-    and (data[2] == CRSF.CONST.ADDRESS_RX or data[2] == CRSF.CONST.ADDRESS_TX_MODULE)
+    data[1] == CRSF.CONST.ADDRESS_HANDSET
+    and (data[2] == CRSF.CONST.ADDRESS_RX or data[2] == CRSF.CONST.ADDRESS_TX)
   then
     local mspCmd = data[5]
 
@@ -136,8 +136,8 @@ local function requestUid()
   uidText = "Updating..."
 
   CRSF.push(CRSF.CONST.FRAMETYPE_MSP_REQ, {
-    (targetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX,
-    CRSF.CONST.ADDRESS_RADIO_TRANSMITTER,
+    (targetIdx == 1) and CRSF.CONST.ADDRESS_TX or CRSF.CONST.ADDRESS_RX,
+    CRSF.CONST.ADDRESS_HANDSET,
     0x30,
     0x01,
     MSP_ELRS_RXTX_CONFIG,
@@ -200,7 +200,7 @@ local function sendBindinfoPacket(targetAddr)
 
   local data = {
     targetAddr,
-    CRSF.CONST.ADDRESS_RADIO_TRANSMITTER,
+    CRSF.CONST.ADDRESS_HANDSET,
     0x30,
     0x01 + mspPayloadLen,
     MSP_ELRS_RXTX_CONFIG,
@@ -247,7 +247,7 @@ local function requestSendBindphrase()
     uidText = "Setting RX and disconnecting..."
   end
 
-  sendBindinfoPacket((effectiveTargetIdx == 1) and CRSF.CONST.ADDRESS_TX_MODULE or CRSF.CONST.ADDRESS_RX)
+  sendBindinfoPacket((effectiveTargetIdx == 1) and CRSF.CONST.ADDRESS_TX or CRSF.CONST.ADDRESS_RX)
 
   History.add(bindPhrase)
   if targetBothStep == nil then
@@ -261,7 +261,7 @@ end
 
 local function sendBindTx()
   uidText = "Sending bind command..."
-  CRSF.sendBind(CRSF.CONST.ADDRESS_TX_MODULE)
+  CRSF.sendBind(CRSF.CONST.ADDRESS_TX)
   Defer.setTimeout(100, function()
     uidText = "Sent"
   end)

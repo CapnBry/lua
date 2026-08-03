@@ -22,11 +22,11 @@ local CRSF = {}
 
 CRSF.CONST = {
   -- Addresses
-  ADDRESS_RX = 0xEC,
-  ADDRESS_TX_MODULE = 0xEE,
-  ADDRESS_HANDSET = 0xEF,
   ADDRESS_BROADCAST = 0x00,
-  ADDRESS_RADIO_TRANSMITTER = 0xEA,
+  ADDRESS_HANDSET = 0xEA, -- EdgeTX's official handset address
+  ADDRESS_RX = 0xEC,
+  ADDRESS_TX = 0xEE,
+  ADDRESS_HANDSET_ELRS = 0xEF, -- ELRS-custom Lua device address, not standard CRSF
 
   -- Frame types
   FRAMETYPE_DEVICE_PING = 0x28,
@@ -261,7 +261,7 @@ function CRSF:requestDeviceInfo()
     return
   end
   self._lastDevPoll = now
-  CRSF.push(CRSF.CONST.FRAMETYPE_DEVICE_PING, { CRSF.CONST.ADDRESS_BROADCAST, CRSF.CONST.ADDRESS_RADIO_TRANSMITTER })
+  CRSF.push(CRSF.CONST.FRAMETYPE_DEVICE_PING, { CRSF.CONST.ADDRESS_BROADCAST, CRSF.CONST.ADDRESS_HANDSET })
 end
 
 --- Request ELRS status from the TX module (PARAMETER_WRITE with fieldId=0).
@@ -273,7 +273,7 @@ function CRSF:requestElrsStatus()
     return
   end
   self._lastStatusPoll = now
-  CRSF.push(CRSF.CONST.FRAMETYPE_PARAMETER_WRITE, { CRSF.CONST.ADDRESS_TX_MODULE, CRSF.CONST.ADDRESS_HANDSET, 0, 0 })
+  CRSF.push(CRSF.CONST.FRAMETYPE_PARAMETER_WRITE, { CRSF.CONST.ADDRESS_TX, CRSF.CONST.ADDRESS_HANDSET_ELRS, 0, 0 })
 end
 
 -- Send a BIND command to the dest ADDR (default TX)
@@ -293,7 +293,7 @@ end
 
 -- DEVICE_INFO handler: parses and caches module name, version, RFMOD/RFRSSI
 local function onDeviceInfo(data)
-  if data[2] ~= CRSF.CONST.ADDRESS_TX_MODULE then
+  if data[2] ~= CRSF.CONST.ADDRESS_TX then
     return
   end
 
