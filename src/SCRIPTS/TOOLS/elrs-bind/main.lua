@@ -42,10 +42,14 @@ function Defer.poll()
 end
 
 local History = {
-  MAX = 5,
+  MAX = 20,
+  PAGE = 5,
   FNAME = "history.txt",
   vals = {},
 }
+
+-- Index of the first history entry shown; scrolls in steps of History.PAGE
+local histOffset = 0
 
 function History.add(s)
   if s == nil or s == "" then
@@ -64,6 +68,9 @@ function History.add(s)
   while #History.vals > History.MAX do
     table.remove(History.vals)
   end
+
+  -- a new entry goes to the top of the list, make sure it is on screen
+  histOffset = 0
 
   History.save()
 end
@@ -276,18 +283,45 @@ local function sendBindRx()
 end
 
 local rebuildUi
+
+-- Keep the scroll window inside the bounds of the current history
+local function history_clampOffset()
+  local maxOffset = #History.vals - History.PAGE
+  if maxOffset < 0 then
+    maxOffset = 0
+  end
+  if histOffset > maxOffset then
+    histOffset = maxOffset
+  end
+  if histOffset < 0 then
+    histOffset = 0
+  end
+end
+
 local function history_text(id)
-  return History.vals[id]
+  return History.vals[id + histOffset]
 end
 local function history_visible(id)
   return history_text(id) ~= nil
 end
 local function history_press(id)
-  bindPhrase = History.vals[id]
+  bindPhrase = History.vals[id + histOffset]
   rebuildUi()
 end
 local function history_remove(id)
-  History.remove(id)
+  History.remove(id + histOffset)
+  history_clampOffset()
+end
+local function history_scroll(delta)
+  histOffset = histOffset + delta
+  history_clampOffset()
+end
+local function history_position()
+  local last = histOffset + History.PAGE
+  if last > #History.vals then
+    last = #History.vals
+  end
+  return string.format("%d-%d / %d", histOffset + 1, last, #History.vals)
 end
 
 rebuildUi = function()
@@ -425,7 +459,7 @@ rebuildUi = function()
     w = lvgl.PERCENT_SIZE + 100,
     align = CENTER,
   })
-  for i = 1, History.MAX do
+  for i = 1, History.PAGE do
     local row = histSection:box({
       w = lvgl.PERCENT_SIZE + 100,
       flexFlow = lvgl.FLOW_ROW,
@@ -453,6 +487,39 @@ rebuildUi = function()
       end,
     })
   end
+
+  -- Scroll controls, only shown when the history is longer than one page
+  local navRow = histSection:box({
+    w = lvgl.PERCENT_SIZE + 100,
+    flexFlow = lvgl.FLOW_ROW,
+    flexPad = lvgl.PAD_SMALL,
+    visible = function()
+      return #History.vals > History.PAGE
+    end,
+  })
+  navRow:button({
+    text = "Up",
+    press = function()
+      return history_scroll(-History.PAGE)
+    end,
+    active = function()
+      return histOffset > 0
+    end,
+  })
+  navRow:button({
+    text = "Down",
+    press = function()
+      return history_scroll(History.PAGE)
+    end,
+    active = function()
+      return histOffset + History.PAGE < #History.vals
+    end,
+  })
+  navRow:label({
+    text = function()
+      return history_position()
+    end,
+  })
 end
 
 local function init()
